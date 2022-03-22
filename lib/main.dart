@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:whatsapp/views/Login.dart';
-import 'package:whatsapp/views/init.dart';
+import 'package:whatsapp/views/inicio.dart';
 
 void main()  async{
   WidgetsFlutterBinding.ensureInitialized();
