@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:whatsapp/GeraRotas.dart';
 import 'package:whatsapp/model/Usuario.dart';
 import 'package:whatsapp/views/Home.dart';
 
@@ -60,8 +61,7 @@ class cadastroState extends State<cadastro> {
           .doc(firebaseUser.user!.uid.toString())
           .set(userr.toMap());
 
-      Navigator.pushAndRemoveUntil(
-          context, MaterialPageRoute(builder: (context)=>Home()), (route) => false);
+      Navigator.pushNamedAndRemoveUntil(context, GerarRotas.ROUTE_HOME, (route) => false);
 
     })
         .catchError((erro) {

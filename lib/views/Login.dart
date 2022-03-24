@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:whatsapp/GeraRotas.dart';
 import 'package:whatsapp/model/Usuario.dart';
 import 'package:whatsapp/views/Home.dart';
 import 'package:whatsapp/views/cadastro.dart';
@@ -42,10 +43,8 @@ class LoginState extends State<Login> {
         password: user.senha
     ).then((firebaseUser){
 
-         Navigator.pushReplacement(
-             context,
-             MaterialPageRoute(builder: (context) => Home())
-         );
+         Navigator.pushNamedAndRemoveUntil(context, GerarRotas.ROUTE_HOME, (route) => false);
+
     }).catchError((erro){
           mostrarSnackBar("E-mail ou Senha inválido,verifique os campos ");
     });
@@ -56,8 +55,7 @@ class LoginState extends State<Login> {
     FirebaseAuth auth =FirebaseAuth.instance;
     User user =  await auth.currentUser!;
     if(user != null){
-      Navigator.pushAndRemoveUntil(
-          context, MaterialPageRoute(builder: (context)=>Home()), (route) => false);
+       Navigator.pushNamedAndRemoveUntil(context, GerarRotas.ROUTE_HOME,(route) => false);
     }
   }
 
@@ -168,10 +166,7 @@ class LoginState extends State<Login> {
 
               TextButton(
                   onPressed: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(builder:(context) => cadastro())
-                      );
+                     Navigator.pushNamed(context,GerarRotas.ROUTE_CADASTRO);
                   },
                   child: Text("Cadastre-se!",
                       style: TextStyle(fontSize: 15, color: Colors.white)))

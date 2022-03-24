@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:whatsapp/GeraRotas.dart';
 import 'package:whatsapp/views/Login.dart';
 import 'package:whatsapp/views/inicio.dart';
 
@@ -16,5 +17,7 @@ void main()  async{
               accentColor: Colors.red,
               primaryColor: Colors.green
             ) ,
+          initialRoute: "/",
+           onGenerateRoute: GerarRotas.inicializarRotas,
       ));
 }

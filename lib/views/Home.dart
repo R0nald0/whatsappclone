@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:whatsapp/GeraRotas.dart';
 import 'package:whatsapp/model/Usuario.dart';
 import 'package:whatsapp/views/AbaContato.dart';
 import 'package:whatsapp/views/AbaConversa.dart';
@@ -37,8 +38,7 @@ class HomeState extends State<Home> with SingleTickerProviderStateMixin{
 
   Future deslogarUsuario() async{
     await auth.signOut();
-    Navigator.pushAndRemoveUntil(
-        context, MaterialPageRoute(builder: (context)=>Login()), (route) => false);
+      Navigator.pushNamedAndRemoveUntil(context, GerarRotas.ROUTE_LOGIN, (route) => false);
   }
 
   @override
@@ -73,6 +73,7 @@ class HomeState extends State<Home> with SingleTickerProviderStateMixin{
           ],
         ),
         actions: [
+          ///MENU POPUP
           PopupMenuButton<String>(
               onSelected: _escolhaItem,
               itemBuilder: (context){
