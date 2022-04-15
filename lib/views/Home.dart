@@ -1,4 +1,5 @@
 
+import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
@@ -28,7 +29,7 @@ class HomeState extends State<Home> with SingleTickerProviderStateMixin{
 
       switch(itemEscolhido){
          case "Configuração":
-         print("Items " + itemEscolhido);
+           Navigator.pushNamed(context, GerarRotas.ROUTE_CONFIG);
          break;
         case "Deslogar":
           deslogarUsuario();
@@ -56,7 +57,7 @@ class HomeState extends State<Home> with SingleTickerProviderStateMixin{
         title: Text("WhatsApp"),
         backgroundColor: Color(0xff075E54),
         bottom:TabBar(
-          indicatorWeight: 4,
+          indicatorWeight:Platform.isIOS ?0 :4,
             indicatorColor: Colors.white,
             controller: _tabController,
           tabs: [

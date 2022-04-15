@@ -1,5 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:whatsapp/GeraRotas.dart';
 import 'package:whatsapp/model/Contato.dart';
+import 'package:whatsapp/model/Usuario.dart';
 
 class AbaContato extends StatefulWidget{
   @override
@@ -8,43 +12,115 @@ class AbaContato extends StatefulWidget{
 }
 
 class AbaContatoState extends State<AbaContato> {
-  List<Contato> listaCt =[
-    Contato("Margot Robbie ", "MargotRobbie@gmail.com ", "https://i0.wp.com/www.fashionbubbles."
-        "com/wp-content/blogs.dir/1/files/2021/01/bill-7-1.png?fit=1256%2C750&ssl=1"),
-    Contato("Gal Gadot", "GalGado@hotmail.com","https://i0.wp.com/www.fashionbubbles.com/wp-content/blogs."
-        "dir/1/files/2021/01/modelo-israelense.png?w=796&ssl=1"),
-    Contato("Michael B. Jordan","MichaelBJordan@hotmail.com","https://assets.papodehomem.com.br"
-        "/2019/11/22/14/24/27/ed724cee-8ea2-4b46-abee-161c92d79a1f/michaelbj-jpg"),
-  ];
-  
+
+  String emaillUser = "";
+
+   Future<List<Contato>> recuperarContatos() async{
+      FirebaseFirestore bd = FirebaseFirestore.instance;
+
+      QuerySnapshot snapshot  = await bd.collection("usuario").get();
+
+         List<Contato> listContato = [];
+         for(QueryDocumentSnapshot item  in snapshot.docs){
+           if(item.get("email") == emaillUser) continue;
+
+           Contato contato = Contato();
+           contato.nome=item.get("nome");
+           contato.email=item.get("email");
+           contato.foto=item.get('fotoPerfil');
+           contato.idContato=item.id;
+
+           listContato.add(contato);
+         }
+
+         return listContato;
+   }
+
+   Future recuperarDados() async{
+     FirebaseAuth auth = FirebaseAuth.instance;
+     FirebaseFirestore bd = FirebaseFirestore.instance;
+
+     DocumentSnapshot dados = await bd.collection("usuario").doc(auth.currentUser!.uid).get();
+
+       emaillUser  = dados.get("email");
+
+   }
+   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    recuperarDados();
+    recuperarContatos();
+
+  }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-          padding: EdgeInsets.all(10),
-         child: Expanded(
-           child: ListView.builder(
-               itemCount: listaCt.length,
-               itemBuilder: (context,index){
-                    Contato contato = listaCt[index];
 
-                 return ListTile(
-                    contentPadding: EdgeInsets.fromLTRB(16, 8, 16, 8),
-                   leading: CircleAvatar(
-                     backgroundImage:NetworkImage(contato.foto),
-                     maxRadius: 30,
-                     backgroundColor: Colors.green,
-                   ),
-                   trailing: Icon(Icons.message_rounded,color: Colors.green),
-                   title: Text(contato.nome),
-                   subtitle: Text(contato.email),
+
+     return Scaffold(
+      body: FutureBuilder<List<Contato>>(
+         future: recuperarContatos(),
+        builder:(context,snapshot){
+              String teste;
+             switch(snapshot.connectionState){
+               case ConnectionState.none:
+                 break;
+               case ConnectionState.waiting:
+                 return Center(
+                    child: CircularProgressIndicator(),
                  );
-               }
-           
-           ),
-         ),
+                 break;
+               case ConnectionState.active:
+                 break;
 
-      ),
+
+               case ConnectionState.done:
+                 if(snapshot.hasData){
+
+                    return
+
+                          ListView.builder(
+
+                            itemCount: snapshot.data!.length,
+                            itemBuilder: (context,index){
+                               List<Contato>? contatos = snapshot.data;
+                               Contato contato = contatos![index];
+
+
+                              return ListTile(
+                                contentPadding: EdgeInsets.fromLTRB(16, 8, 16, 8),
+                                leading: CircleAvatar(
+                                  backgroundImage:NetworkImage(contato.foto),
+                                  maxRadius: 30,
+                                  backgroundColor: Colors.green,
+                                ),
+
+                                trailing: Icon(Icons.message_rounded,color: Colors.green),
+                                title: Text(contato.nome),
+                                subtitle: Text(contato.email),
+                                onTap: (){
+                                     Navigator.pushNamed(
+                                         context,
+                                         GerarRotas.ROUTE_CONVERSA
+                                         ,arguments: contato
+                                     );
+                                },
+                              );
+                            }
+                        );
+
+
+                 } else{
+                   return Center(
+                      child: Text("Erro ao  Carregar os Contatos"),
+                   );
+                 }
+                 break;
+                 }
+              return Center();
+      }
+      )
     );
   }
 }

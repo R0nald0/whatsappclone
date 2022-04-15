@@ -31,6 +31,7 @@ class cadastroState extends State<cadastro> {
           usuario.nome = nome;
           usuario.email = email;
           usuario.senha = senha;
+          usuario.fotoPerfil ="";
 
           CadastrarUsuario(usuario);
 
