@@ -8,7 +8,7 @@ import 'package:whatsapp/GeraRotas.dart';
 import 'package:whatsapp/model/Usuario.dart';
 import 'package:whatsapp/views/AbaContato.dart';
 import 'package:whatsapp/views/AbaConversa.dart';
-import 'package:whatsapp/views/Login.dart';
+import 'package:whatsapp/views/pages/login_page/Login.dart';
 import 'package:whatsapp/views/camera.dart';
 
 class Home extends StatefulWidget {

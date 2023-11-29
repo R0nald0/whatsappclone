@@ -1,9 +1,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:whatsapp/views/Home.dart';
-import 'package:whatsapp/views/Login.dart';
-import 'package:whatsapp/views/cadastro.dart';
-import 'package:whatsapp/views/telaConfiguracao.dart';
+import 'package:whatsapp/views/pages/login_page/Login.dart';
+import 'package:whatsapp/views/pages/cadastro_page/cadastro.dart';
+import 'package:whatsapp/views/pages/configuracao_page/telaConfiguracao.dart';
 import 'package:whatsapp/views/telaConversa.dart';
 
 import 'model/Contato.dart';
@@ -47,17 +47,17 @@ class GerarRotas {
         break;
 
       default:
-        _erroRoute();
+        _errorRoute();
     }
   }
 
-  static Route<dynamic>? _erroRoute() {
+  static Route<dynamic>? _errorRoute() {
     return MaterialPageRoute(builder: (_) {
       return Scaffold(
         appBar: AppBar(
-          title: Text("TELA DE ERRO"),
+          title: const Text("TELA DE ERRO"),
         ),
-        body: Center(
+        body: const Center(
           child: Text("Erro de Rota"),
         ),
       );

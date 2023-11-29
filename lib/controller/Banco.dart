@@ -8,17 +8,16 @@ import 'package:whatsapp/model/Usuario.dart';
 class Banco {
   FirebaseAuth auth = FirebaseAuth.instance;
   FirebaseFirestore firestore =FirebaseFirestore.instance;
-
   Banco();
 
-  login(Usuario usuario)async{
-
-      await auth.signInWithEmailAndPassword(
-     email: usuario.email,
-      password: usuario.senha,
-  );
-
-      return usuario;
+ Future<String> login(String email, String senha)async{
+      try{
+        await auth.signInWithEmailAndPassword(email: email, password: senha,);
+        return "Logando...";
+      }catch(e){
+         print(e);
+         throw e;
+      }
   }
 
   recuperarMensagens(Mensagem mensagem) async{
@@ -52,7 +51,6 @@ class Banco {
 
   Future verificarUsuarioLogado() async{
     User? user = await auth.currentUser;
-
     return user;
   }
 
