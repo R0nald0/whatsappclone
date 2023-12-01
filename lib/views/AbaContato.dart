@@ -67,7 +67,7 @@ class AbaContatoState extends State<AbaContato> {
                case ConnectionState.none:
                  break;
                case ConnectionState.waiting:
-                 return Center(
+                 return const Center(
                     child: CircularProgressIndicator(),
                  );
                  break;
@@ -96,7 +96,7 @@ class AbaContatoState extends State<AbaContato> {
                                   backgroundColor: Colors.green,
                                 ),
 
-                                trailing: Icon(Icons.message_rounded,color: Colors.green),
+                                trailing: const Icon(Icons.message_rounded,color: Colors.green),
                                 title: Text(contato.nome),
                                 subtitle: Text(contato.email),
                                 onTap: (){

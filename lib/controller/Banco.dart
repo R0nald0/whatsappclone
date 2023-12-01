@@ -54,6 +54,32 @@ class Banco {
     return user;
   }
 
+  Future<String> cadastrarUsuario(String name,String email ,String password)async {
+
+        try{
+          await  auth.createUserWithEmailAndPassword(email: email, password: password)
+              .then((value) =>(){
+            var user = value.user;
+            if(user != null){
+              Map<String, dynamic> map = {
+                "nome": name,
+                "email": user.email,
+              };
+              firestore.collection("usuario")
+                  .doc(user.uid.toString())
+                  .set(map);
+            }
+          });
+          return "Sucesso ao cadastrar";
+        }catch(execption){
+           if( execption is FirebaseAuthException){
+             print(execption);
+             throw FirebaseAuthException(message: "email inválido,altere o email", code: '1');
+           }
+           rethrow;
+         }
+
+        }
+  }
 
 
-}

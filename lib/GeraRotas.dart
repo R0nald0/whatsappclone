@@ -1,6 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'package:whatsapp/views/Home.dart';
+import 'package:whatsapp/views/pages/home_page/Home.dart';
 import 'package:whatsapp/views/pages/login_page/Login.dart';
 import 'package:whatsapp/views/pages/cadastro_page/cadastro.dart';
 import 'package:whatsapp/views/pages/configuracao_page/telaConfiguracao.dart';

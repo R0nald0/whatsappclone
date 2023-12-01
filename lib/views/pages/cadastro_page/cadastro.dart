@@ -2,9 +2,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:whatsapp/GeraRotas.dart';
 import 'package:whatsapp/model/Usuario.dart';
-import 'package:whatsapp/views/Home.dart';
+import 'package:whatsapp/views/pages/home_page/Home.dart';
+import 'package:whatsapp/views/pages/cadastro_page/stream/cadastro_bloc.dart';
+import 'package:whatsapp/views/pages/cadastro_page/stream/cadastro_state.dart';
+import 'package:whatsapp/views/pages/login_page/stream/validate_fields.dart';
 
 class cadastro extends StatefulWidget {
   @override
@@ -15,75 +19,19 @@ class cadastroState extends State<cadastro> {
   TextEditingController _controllerNome = TextEditingController();
   TextEditingController _controllerEmail = TextEditingController();
   TextEditingController _controllerSenha = TextEditingController();
-  FirebaseAuth _auth = FirebaseAuth.instance;
-
-  validarCampo() {
-    String nome = _controllerNome.text;
-    String email = _controllerEmail.text;
-    String senha = _controllerSenha.text;
-    String _aviso = "";
-
-    if (nome.isNotEmpty && nome.length > 3) {
-      if (email.isNotEmpty && email.contains("@")) {
-        if (senha.length >= 6) {
-          Usuario usuario = Usuario();
-
-          usuario.nome = nome;
-          usuario.email = email;
-          usuario.senha = senha;
-          usuario.fotoPerfil ="";
-
-          CadastrarUsuario(usuario);
-
-
-        } else {
-          _aviso = "Senha priecisa conter 6 ou mais caracteres !!!";
-          _mostrarSnackBar(_aviso);
-        }
-      } else {
-        _aviso = "Insira um E-mail válido";
-        _mostrarSnackBar(_aviso);
-      }
-    } else {
-      _aviso = "Nome precisa ter mais que letras 4 ";
-      _mostrarSnackBar(_aviso);
-    }
-  }
-
-  Future CadastrarUsuario(Usuario userr) async {
-     await _auth.createUserWithEmailAndPassword(
-            email: userr.email, 
-            password: userr.senha
-    
-    ).then((firebaseUser) {
-     
-      FirebaseFirestore db = FirebaseFirestore.instance;
-      db.collection("usuario")
-          .doc(firebaseUser.user!.uid.toString())
-          .set(userr.toMap());
-
-      Navigator.pushNamedAndRemoveUntil(context, GerarRotas.ROUTE_HOME, (route) => false);
-
-    })
-        .catchError((erro) {
-      if (erro.toString().isEmpty) {
-        _mostrarSnackBar("Usuário Cadastrado");
-      } else {
-        _mostrarSnackBar("Erro ao Cadastrar,Verifique os campos!!!");
-      }
-    });
-  }
+  final _forkey = GlobalKey<FormState>();
+  final _cadastroBloc = CadastroBloc();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Cadastro"),
-        backgroundColor: Color(0xff075E54),
+        title: const Text("Cadastro"),
+        backgroundColor: const Color(0xff075E54),
       ),
       body: Container(
-        padding: EdgeInsets.all(25),
-        decoration: BoxDecoration(
+        padding: const EdgeInsets.all(25),
+        decoration: const BoxDecoration(
           color: Color(0xff075E54),
         ),
         child: Center(
@@ -95,7 +43,7 @@ class cadastroState extends State<cadastro> {
                   height: 200,
                   width: 150,
                 ),
-                campoTextFild(),
+                campoTextField(),
                 campoBotoes(),
               ],
             ),
@@ -105,61 +53,86 @@ class cadastroState extends State<cadastro> {
     );
   }
 
-  campoTextFild() {
-    return Container(
+  campoTextField() {
+    return Form(
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      key: _forkey,
       child: Column(
         children: <Widget>[
           Padding(
-            padding: EdgeInsets.only(bottom: 8, top: 18),
-            child: TextField(
-              controller: _controllerNome,
-              keyboardType: TextInputType.name,
-              style: TextStyle(
-                fontSize: 20,
-              ),
-              decoration: InputDecoration(
-                contentPadding: EdgeInsets.fromLTRB(32, 16, 32, 16),
-                hintText: "Nome",
-                filled: true,
-                fillColor: Colors.white,
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(32)),
-              ),
-            ),
+            padding: const EdgeInsets.only(bottom: 8, top: 18),
+            child: TextFormField(
+                  validator: (value){
+                   if(value ==null  || value.length <=4){
+                     print(value);
+                    return "Preencha até 5 caracteres";
+                   }
+                   return null;
+                },
+                  controller: _controllerNome,
+                  keyboardType: TextInputType.name,
+                  style: const TextStyle(
+                    fontSize: 20,
+                  ),
+                  decoration: InputDecoration(
+                    errorStyle: const TextStyle(color: Colors.redAccent),
+                    contentPadding: const EdgeInsets.fromLTRB(32, 16, 32, 16),
+                    hintText: "Nome",
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(32)),),
+                ),
           ),
-          TextField(
+          TextFormField(
             keyboardType: TextInputType.emailAddress,
             controller: _controllerEmail,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 20,
             ),
             decoration: InputDecoration(
+              errorStyle: const TextStyle(color: Colors.redAccent),
               hintText: "E-mail",
               border:
                   OutlineInputBorder(borderRadius: BorderRadius.circular(32)),
               filled: true,
               fillColor: Colors.white,
-              contentPadding: EdgeInsets.fromLTRB(32, 16, 32, 16),
+              contentPadding: const EdgeInsets.fromLTRB(32, 16, 32, 16),
             ),
+            validator: (value){
+              if(value ==null  || !value.contains("@")){
+                print(value);
+                return "Email inválido";
+              }
+              return null;
+            },
           ),
           Padding(
-            padding: EdgeInsets.only(top: 8, bottom: 9),
-            child: TextField(
+            padding: const EdgeInsets.only(top: 8, bottom: 9),
+            child: TextFormField(
               controller: _controllerSenha,
               obscureText: true,
               keyboardType: TextInputType.text,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 20,
               ),
               decoration: InputDecoration(
-                contentPadding: EdgeInsets.fromLTRB(32, 16, 32, 16),
+                contentPadding: const EdgeInsets.fromLTRB(32, 16, 32, 16),
                 filled: true,
                 fillColor: Colors.white,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(32),
                 ),
                 hintText: "Senha",
+                errorStyle: const TextStyle(color: Colors.redAccent),
               ),
+
+                validator: (value){
+                  if(value ==null  || value.length <=5){
+                    print(value);
+                    return "Senha precisa conter mais de 5 caracteres";
+                  }
+                  return null;
+                }
             ),
           ),
         ],
@@ -172,16 +145,37 @@ class cadastroState extends State<cadastro> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          ElevatedButton(
-              onPressed: () {
-                validarCampo();
-              },
-              style: ElevatedButton.styleFrom(
-                  primary: Colors.green,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(32)),
-                  padding: EdgeInsets.fromLTRB(32, 16, 32, 16)),
-              child: Text("Cadastrar", style: TextStyle(fontSize: 20)))
+          BlocConsumer<CadastroBloc,CadastroState>(
+            bloc: _cadastroBloc,
+            listener: (BuildContext context, CadastroState state) {
+                if(state is ErrorCadastroState){
+                  _mostrarSnackBar(state.errorMessenger);
+                }
+                if(state is SuccessCadastroState){
+                  _mostrarSnackBar(state.messenger);
+                  Navigator.pushNamedAndRemoveUntil(context, GerarRotas.ROUTE_LOGIN, (route) => false);
+                }
+            },
+            builder: (context, state) {
+              if(state is LoadingState){
+                 return const Center(child: CircularProgressIndicator());
+              }else{
+                return ElevatedButton(
+                onPressed: () {
+                if(_forkey.currentState!.validate()){
+                // validarCampo();
+                   _cadastroBloc.cadastrarUsuario(_controllerNome.text, _controllerEmail.text, _controllerSenha.text);
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                primary: Colors.green,
+                shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(32)),
+                padding: const EdgeInsets.fromLTRB(32, 16, 32, 16)),
+                child: const Text("Cadastrar", style: TextStyle(fontSize: 20)));
+                }
+              }
+          )
         ],
       ),
     );
@@ -191,7 +185,7 @@ class cadastroState extends State<cadastro> {
     final snackBar = SnackBar(
         content: Text(
       msg,
-      style: TextStyle(
+      style: const TextStyle(
         fontSize: 15,
       ),
     ));

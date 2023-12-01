@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:whatsapp/views/pages/login_page/Login.dart';
 
-import 'Home.dart';
+import 'pages/home_page/Home.dart';
 
 class inicio extends StatefulWidget{
   @override

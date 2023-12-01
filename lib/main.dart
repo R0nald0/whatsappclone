@@ -14,7 +14,7 @@ void main()  async{
   );
 
  final ThemeData ios =ThemeData(
-       colorScheme: ColorScheme.fromSwatch().copyWith(onSecondary: Color(0xff25D366)),
+       colorScheme: ColorScheme.fromSwatch().copyWith(onSecondary: const Color(0xff25D366)),
        primaryColor:Colors.grey[200],
       buttonTheme:const ButtonThemeData(
           buttonColor: Colors.white
@@ -22,7 +22,7 @@ void main()  async{
   ) ;
 
   final ThemeData temaPadrao =ThemeData(
-      colorScheme: ColorScheme.fromSwatch().copyWith(secondary: Color(0xff25D366)),
+      colorScheme: ColorScheme.fromSwatch().copyWith(secondary: const Color(0xff25D366)),
       primaryColor: const Color(0xff075E54),
       buttonTheme:const ButtonThemeData(
           buttonColor: Colors.white
