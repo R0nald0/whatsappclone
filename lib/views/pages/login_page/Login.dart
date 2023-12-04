@@ -17,7 +17,6 @@ class LoginState extends State<Login> {
   final TextEditingController _controllerEmail =TextEditingController();
   final TextEditingController _controllerSenha = TextEditingController();
   final validateFields = ValidateFieldsBloc();
-  final String _aviso = "";
 
   Future vericarUsuarioLogado()  async{
     FirebaseAuth auth =FirebaseAuth.instance;
@@ -180,5 +179,11 @@ class LoginState extends State<Login> {
         )
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    validateFields.close();
+    super.dispose();
   }
 }

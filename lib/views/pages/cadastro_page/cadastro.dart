@@ -164,7 +164,11 @@ class cadastroState extends State<cadastro> {
                 onPressed: () {
                 if(_forkey.currentState!.validate()){
                 // validarCampo();
-                   _cadastroBloc.cadastrarUsuario(_controllerNome.text, _controllerEmail.text, _controllerSenha.text);
+                  final usuario  =Usuario();
+                  usuario.email = _controllerEmail.text;
+                  usuario.nome =  _controllerNome.text;
+                  usuario.senha = _controllerSenha.text;
+                   _cadastroBloc.cadastrarUsuario(usuario);
                   }
                 },
                 style: ElevatedButton.styleFrom(
@@ -190,5 +194,10 @@ class cadastroState extends State<cadastro> {
       ),
     ));
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+  @override
+  void dispose() {
+    _cadastroBloc.close();
+    super.dispose();
   }
 }

@@ -4,10 +4,10 @@ import "package:flutter/material.dart";
 import 'package:whatsapp/controller/Banco.dart';
 
 class Usuario {
-  late String _nome;
-  late String _email;
-  late String _senha;
-  late String _fotoPerfil ;
+  late String _nome ="";
+  late String _email ="";
+  late String _senha ="";
+  late String _fotoPerfil ="" ;
 
   Usuario();
 
@@ -16,7 +16,7 @@ class Usuario {
     Banco bd = Banco();
        DocumentSnapshot snapshot = await bd.firestore.collection("usuario").doc(idUsuario).get();
 
-       Usuario usuario = Usuario();
+        Usuario usuario = Usuario();
         usuario.nome = snapshot.get("nome");
         usuario.fotoPerfil =snapshot.get("fotoPerfil");
         usuario.email=snapshot.get("email");

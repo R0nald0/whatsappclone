@@ -6,8 +6,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:whatsapp/GeraRotas.dart';
 import 'package:whatsapp/model/Usuario.dart';
-import 'package:whatsapp/views/AbaContato.dart';
-import 'package:whatsapp/views/AbaConversa.dart';
+import 'package:whatsapp/views/pages/contato_page/AbaContato.dart';
+import 'package:whatsapp/views/pages/conversa_page/AbaConversa.dart';
 import 'package:whatsapp/views/pages/login_page/Login.dart';
 import 'package:whatsapp/views/pages/status_page/camera.dart';
 

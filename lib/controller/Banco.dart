@@ -10,7 +10,7 @@ class Banco {
   FirebaseFirestore firestore =FirebaseFirestore.instance;
   Banco();
 
- Future<String> login(String email, String senha)async{
+  Future<String> login(String email, String senha)async{
       try{
         await auth.signInWithEmailAndPassword(email: email, password: senha,);
         return "Logando...";
@@ -29,15 +29,13 @@ class Banco {
        return mensagem;
   }
 
-
-
   salvarDestinatarioMensagem (Mensagem mensagem) async{
     await  firestore.collection("mensagen").doc(mensagem.idDestinatario)
         .collection(mensagem.idRemetente)
         .add(mensagem.toMap());
   }
 
-  Future recuperarUsuario(User user) async{
+  Future<Usuario> recuperarUsuario(User user) async{
 
     Usuario usuario = Usuario();
            DocumentSnapshot dados = await firestore.collection("usuario").doc(user.uid).get();
@@ -49,27 +47,16 @@ class Banco {
           return usuario;
   }
 
-  Future verificarUsuarioLogado() async{
+  Future<User?> verificarUsuarioLogado() async{
     User? user = await auth.currentUser;
     return user;
   }
 
-  Future<String> cadastrarUsuario(String name,String email ,String password)async {
+  Future<String> cadastrarUsuario(Usuario usuario)async {
 
         try{
-          await  auth.createUserWithEmailAndPassword(email: email, password: password)
-              .then((value) =>(){
-            var user = value.user;
-            if(user != null){
-              Map<String, dynamic> map = {
-                "nome": name,
-                "email": user.email,
-              };
-              firestore.collection("usuario")
-                  .doc(user.uid.toString())
-                  .set(map);
-            }
-          });
+         var  a= await auth.createUserWithEmailAndPassword(email: usuario.email, password: usuario.senha).
+              whenComplete(() async => await salvarUsuario(usuario));
           return "Sucesso ao cadastrar";
         }catch(execption){
            if( execption is FirebaseAuthException){
@@ -80,6 +67,39 @@ class Banco {
          }
 
         }
+
+Future<String>  salvarUsuario(Usuario usuario) async {
+   try{
+     final userLogado = await verificarUsuarioLogado();
+      if(userLogado !=null){
+        await firestore.collection("usuario")
+            .doc(userLogado?.uid.toString())
+            .set(usuario.toMap());
+        return "usario salvo no fireestore";
+      }
+            return "usario null";
+   }catch(e){
+      print(e);
+      rethrow;
+   }
+ }
+
+ Future<List<Conversa>> recuperarConversas( ) async{
+    final userLogado = await verificarUsuarioLogado();
+    if(userLogado != null){
+      Banco _bd = Banco();
+      final stream =  await _bd.firestore.collection("conversa")
+          .doc(userLogado.uid)
+          .collection("utimaConversa")
+          .snapshots();
+
+       stream.listen((event) {
+         print("event ${event}");
+       });
+    }
+    return [];
+    }
+
   }
 
 
