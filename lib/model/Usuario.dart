@@ -11,7 +11,6 @@ class Usuario {
 
   Usuario();
 
-
    Future<Usuario> dadosUser(String idUsuario ) async {
     Banco bd = Banco();
        DocumentSnapshot snapshot = await bd.firestore.collection("usuario").doc(idUsuario).get();

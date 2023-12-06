@@ -127,7 +127,11 @@ class TelaConversaState extends State<TelaConversa> {
 
   Future salvarConversa(Mensagem mensagem) async {
     Usuario usuario = await Usuario().dadosUser(idUserLogado);
-    Conversa cRementent = Conversa();
+    Conversa cRementent = Conversa(
+        mensagem.idRemetente,
+        mensagem.idDestinatario,
+        mensagem.url
+    );
 
     cRementent.data = mensagem.data;
     cRementent.idDestinatario = mensagem.idDestinatario;
@@ -140,7 +144,11 @@ class TelaConversaState extends State<TelaConversa> {
 
     cRementent.salvarConversaBd();
 
-    Conversa cDestinatrio = Conversa();
+    Conversa cDestinatrio = Conversa(
+       mensagem.idRemetente,
+        mensagem.idDestinatario,
+        mensagem.url
+    );
     cDestinatrio.idDestinatario = mensagem.idRemetente;
     cDestinatrio.idRemetente = mensagem.idDestinatario;
     cDestinatrio.tipo = mensagem.tipo;

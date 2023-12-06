@@ -1,26 +1,28 @@
-import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'package:whatsapp/controller/Banco.dart';
-import 'package:whatsapp/model/Usuario.dart';
+import 'package:whatsapp/helper/Constants.dart';
+
 
 class Conversa {
-  late String _idDestinatario;
-  late String _idRemetente;
-  late String _remetenteNome;
-  late String _msg;
-  late String _fotoUrl;
-  late String _tipo;
-  late String _urlImagenConversa;
-  late String _data;
+   String _idDestinatario ="";
+   String _idRemetente= "";
+   String _remetenteNome ="";
+   String _msg ="";
+   String _fotoUrl ="";
+   String _tipo="";
+   String _urlImagenConversa ="";
+   String _data ="";
 
-  Conversa();
+  Conversa(this._remetenteNome,this._idDestinatario,this._msg);
+
 
   Future salvarConversaBd() async {
     Banco bd = Banco();
-
     await bd.firestore
-        .collection("conversa")
+        .collection(Constants.COLLECTION_CONVERSA_BD_NAME)
         .doc(this.idRemetente)
-        .collection("utimaConversa")
+        .collection(Constants.COLLECTION_ULTIMA_CONVERSA_BD_NAME)
         .doc(this.idDestinatario)
         .set(this.toMap());
   }
@@ -37,6 +39,17 @@ class Conversa {
     };
     return map;
   }
+
+   Conversa.fromMap(DocumentSnapshot<Map<String,dynamic>> map){
+     remetenteNome= map["remetenteNome"];
+     msg= map["UltimaMsg"];
+     _idRemetente= map["idRemetente"];
+     idDestinatario= map["idDestinatario"];
+     tipo= map["tipo"];
+     urlImagenConversa= map["_urlImagenConversa"];
+
+  }
+
 
 
   String get data => _data;

@@ -11,15 +11,6 @@ class Contato {
 
   Contato();
 
-  Future recuperararContato(String id) async{
-    Usuario user =  await Usuario().dadosUser(id);
-    Contato contatoCv =Contato();
-    contatoCv.nome=user.nome;
-    contatoCv.email=user.email;
-    contatoCv.foto=user.fotoPerfil;
-    contatoCv.idContato=id;
-    return contatoCv;
-  }
 
   String get foto => _foto;
 
