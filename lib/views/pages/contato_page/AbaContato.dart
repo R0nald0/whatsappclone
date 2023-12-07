@@ -1,125 +1,84 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:whatsapp/GeraRotas.dart';
+import 'package:whatsapp/helper/Helper.dart';
 import 'package:whatsapp/model/Contato.dart';
-import 'package:whatsapp/model/Usuario.dart';
+import 'package:whatsapp/views/pages/contato_page/store/contact_bloc.dart';
 
 class AbaContato extends StatefulWidget{
   @override
   State<StatefulWidget> createState()=>AbaContatoState();
-
 }
 
 class AbaContatoState extends State<AbaContato> {
 
-  String emaillUser = "";
+  final contactoBloc= ContactBloc();
 
-   Future<List<Contato>> recuperarContatos() async{
-      FirebaseFirestore bd = FirebaseFirestore.instance;
-
-      QuerySnapshot snapshot  = await bd.collection("usuario").get();
-
-         List<Contato> listContato = [];
-         for(QueryDocumentSnapshot item  in snapshot.docs){
-           if(item.get("email") == emaillUser) continue;
-
-           Contato contato = Contato();
-           contato.nome=item.get("nome");
-           contato.email=item.get("email");
-           contato.foto=item.get('fotoPerfil');
-           contato.idContato=item.id;
-
-           listContato.add(contato);
-         }
-
-         return listContato;
-   }
-
-   Future recuperarDados() async{
-     FirebaseAuth auth = FirebaseAuth.instance;
-     FirebaseFirestore bd = FirebaseFirestore.instance;
-
-     DocumentSnapshot dados = await bd.collection("usuario").doc(auth.currentUser!.uid).get();
-
-       emaillUser  = dados.get("email");
-
-   }
    @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-
-    recuperarDados();
-    recuperarContatos();
-
+   contactoBloc.getAllContacts();
   }
   @override
   Widget build(BuildContext context) {
-
-
      return Scaffold(
-      body: FutureBuilder<List<Contato>>(
-         future: recuperarContatos(),
-        builder:(context,snapshot){
-              String teste;
-             switch(snapshot.connectionState){
-               case ConnectionState.none:
-                 break;
-               case ConnectionState.waiting:
-                 return const Center(
-                    child: CircularProgressIndicator(),
+      body: BlocConsumer<ContactBloc,ContactState>(
+          bloc:contactoBloc,
+          listener: (BuildContext context, ContactState state) {
+             if(state is ContactErrorState){
+               Helper.mostrarSnackBar(context,state.erroMenseger);
+             }
+          },
+          builder:(context,state){
+             if(state is ContactLoadingState) {
+               return const Center(
+                 child: CircularProgressIndicator(),
+               );
+             }
+             if(state is ContactLoadedState){
+               return
+                 ListView.builder(
+                     itemCount: state.users.length,
+                     itemBuilder: (context,index){
+                       Contato contato = state.users[index];
+                       return ListTile(
+                         contentPadding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                         leading: CircleAvatar(
+                           backgroundImage:NetworkImage(contato.foto),
+                           maxRadius: 30,
+                           backgroundColor: Colors.green,
+                         ),
+
+                         trailing: const Icon(Icons.message_rounded,color: Colors.green),
+                         title: Text(contato.nome),
+                         subtitle: Text(contato.email),
+                         onTap: (){
+                           Navigator.pushNamed(
+                               context,
+                               GerarRotas.ROUTE_CONVERSA
+                               ,arguments: contato
+                           );
+                         },
+                       );
+                     }
                  );
-                 break;
-               case ConnectionState.active:
-                 break;
-
-
-               case ConnectionState.done:
-                 if(snapshot.hasData){
-
-                    return
-
-                          ListView.builder(
-
-                            itemCount: snapshot.data!.length,
-                            itemBuilder: (context,index){
-                               List<Contato>? contatos = snapshot.data;
-                               Contato contato = contatos![index];
-
-
-                              return ListTile(
-                                contentPadding: EdgeInsets.fromLTRB(16, 8, 16, 8),
-                                leading: CircleAvatar(
-                                  backgroundImage:NetworkImage(contato.foto),
-                                  maxRadius: 30,
-                                  backgroundColor: Colors.green,
-                                ),
-
-                                trailing: const Icon(Icons.message_rounded,color: Colors.green),
-                                title: Text(contato.nome),
-                                subtitle: Text(contato.email),
-                                onTap: (){
-                                     Navigator.pushNamed(
-                                         context,
-                                         GerarRotas.ROUTE_CONVERSA
-                                         ,arguments: contato
-                                     );
-                                },
-                              );
-                            }
-                        );
-
-
-                 } else{
-                   return Center(
-                      child: Text("Erro ao  Carregar os Contatos"),
-                   );
-                 }
-                 break;
-                 }
-              return Center();
-      }
+             }else{
+               return  Center(
+                 child: Column(
+                   mainAxisAlignment: MainAxisAlignment.center,
+                   children: [
+                     const Text("Algo deu errado :(" ),
+                     IconButton.outlined(
+                         onPressed:() => contactoBloc.getAllContacts(),
+                         icon: const Icon(Icons.refresh_outlined,),
+                         color: const Color(0xFFFF9000)
+                     ),
+                   ],
+                 ),
+               );
+             }
+         },
       )
     );
   }

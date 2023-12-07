@@ -32,7 +32,7 @@ class Banco {
          QuerySnapshot snapshot = await firestore.
          collection(Constants.COLLECTION_MENSAGEM_BD_NAME)
              .doc(mensagem.idRemetente)
-            .collection(mensagem.idDestinatario)
+             .collection(mensagem.idDestinatario)
              .get();
 
        return mensagem;
@@ -42,7 +42,9 @@ class Banco {
     await  firestore.collection(Constants.COLLECTION_MENSAGEM_BD_NAME)
         .doc(mensagem.idDestinatario)
         .collection(mensagem.idRemetente)
-        .add(mensagem.toMap());
+        .doc(Constants.COLLECTION_MENSAGEM_BD_NAME)
+        .set(mensagem.toMap());
+       // .add(mensagem.toMap());
   }
 
   Future<Usuario> recuperarUsuario(User user) async{
@@ -119,7 +121,7 @@ class Banco {
    return _controller.stream;
   }
 
-  Future<Contato> recuperarContato(String id) async{
+  Future<Contato> recuperarDadoContato(String id) async{
     Usuario user =  await Usuario().dadosUser(id);
     Contato contatoCv =Contato();
     contatoCv.nome=user.nome;
@@ -132,13 +134,42 @@ class Banco {
      _controller.close();
     }
 
+
+  Future<List<Contato>> recuperarContatos() async{
+    FirebaseFirestore bd = FirebaseFirestore.instance;
+
+    QuerySnapshot snapshot  = await bd.collection(Constants.COLLECTION_USUARIO_BD_NAME).get();
+
+    List<Contato> listContato = [];
+    for(QueryDocumentSnapshot item  in snapshot.docs){
+      if(item.get("email") == verificarUsuarioLogado()?.email) continue;
+
+       Contato contato = Contato();
+        contato.nome=item.get("nome");
+        contato.email=item.get("email");
+        contato.foto=item.get('fotoPerfil');
+        contato.idContato=item.id;
+
+      listContato.add(contato);
+    }
+    return listContato;
+  }
+
   Future<void> deleteConversation(String idDestinatarioConversa) async {
        await firestore
            .collection(Constants.COLLECTION_CONVERSA_BD_NAME)
            .doc(verificarUsuarioLogado()?.uid)
            .collection(Constants.COLLECTION_ULTIMA_CONVERSA_BD_NAME)
            .doc(idDestinatarioConversa)
-           .delete();
+           .delete()
+           .whenComplete(() =>
+               firestore.
+               collection(Constants.COLLECTION_MENSAGEM_BD_NAME)
+               .doc(verificarUsuarioLogado()?.uid)
+               .collection(idDestinatarioConversa)
+               .doc(Constants.COLLECTION_MENSAGEM_BD_NAME)
+                   .delete()
+          );
     }
   }
 
