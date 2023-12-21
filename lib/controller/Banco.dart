@@ -1,9 +1,11 @@
 
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:whatsapp/helper/Constants.dart';
 import 'package:whatsapp/model/Conversa.dart';
@@ -13,8 +15,10 @@ import 'package:whatsapp/model/Usuario.dart';
 import '../model/Contato.dart';
 
 class Banco {
-  FirebaseAuth auth = FirebaseAuth.instance;
-  FirebaseFirestore firestore =FirebaseFirestore.instance;
+  final auth = FirebaseAuth.instance;
+  final firestore =FirebaseFirestore.instance;
+  final storage = FirebaseStorage.instance;
+
   Banco();
   final _controller =StreamController<QuerySnapshot>.broadcast();
 
@@ -34,17 +38,7 @@ class Banco {
              .doc(mensagem.idRemetente)
              .collection(mensagem.idDestinatario)
              .get();
-
        return mensagem;
-  }
-
-  salvarDestinatarioMensagem (Mensagem mensagem) async{
-    await  firestore.collection(Constants.COLLECTION_MENSAGEM_BD_NAME)
-        .doc(mensagem.idDestinatario)
-        .collection(mensagem.idRemetente)
-        .doc(Constants.COLLECTION_MENSAGEM_BD_NAME)
-        .set(mensagem.toMap());
-       // .add(mensagem.toMap());
   }
 
   Future<Usuario> recuperarUsuario(User user) async{
@@ -59,13 +53,27 @@ class Banco {
           return usuario;
   }
 
+
+ Future<User?> updateUser(Usuario usuario) async{
+    try{
+      final user  = verificarUsuarioLogado();
+      if(user != null){
+        await firestore.collection(Constants.COLLECTION_USUARIO_BD_NAME).doc(user.uid).update(usuario.toMap());
+        return user;
+      }
+      return null;
+    }catch(exception){
+        print(exception);
+        rethrow;
+    }
+  }
+
   User? verificarUsuarioLogado() {
     User? user =  auth.currentUser;
     return user;
   }
 
   Future<String> cadastrarUsuario(Usuario usuario)async {
-
         try{
          var  a= await auth.createUserWithEmailAndPassword(email: usuario.email, password: usuario.senha).
               whenComplete(() async => await salvarUsuario(usuario));
@@ -77,7 +85,6 @@ class Banco {
            }
            rethrow;
          }
-
         }
 
   Future<String>  salvarUsuario(Usuario usuario) async {
@@ -130,10 +137,10 @@ class Banco {
     contatoCv.idContato=id;
     return contatoCv;
   }
-    destroyListen(){
+
+  destroyListen(){
      _controller.close();
     }
-
 
   Future<List<Contato>> recuperarContatos() async{
     FirebaseFirestore bd = FirebaseFirestore.instance;
@@ -167,11 +174,85 @@ class Banco {
                collection(Constants.COLLECTION_MENSAGEM_BD_NAME)
                .doc(verificarUsuarioLogado()?.uid)
                .collection(idDestinatarioConversa)
-               .doc(Constants.COLLECTION_MENSAGEM_BD_NAME)
-                   .delete()
+
           );
     }
+   //BD para Conversar
+  Future  salvarDestinatarioMensagem (Mensagem mensagem) async{
+    await  firestore
+        .collection(Constants.COLLECTION_MENSAGEM_BD_NAME)
+        .doc(mensagem.idDestinatario)
+        .collection(mensagem.idRemetente)
+    //.doc(Constants.COLLECTION_MENSAGEM_BD_NAME)
+    // .set(mensagem.toMap());
+        .add(mensagem.toMap());
+    }
+
+  Future salvarRemetenteMensagem (Mensagem mensagem) async{
+    await  firestore
+        .collection(Constants.COLLECTION_MENSAGEM_BD_NAME)
+        .doc(mensagem.idRemetente)
+        .collection(mensagem.idDestinatario)
+    //.doc(Constants.COLLECTION_MENSAGEM_BD_NAME)
+    // .set(mensagem.toMap());
+        .add(mensagem.toMap());
+    }
+
+  Future salvarUltimaMensagemBd(Conversa conversa) async {
+    await firestore
+        .collection(Constants.COLLECTION_CONVERSA_BD_NAME)
+        .doc(conversa.idRemetente)
+        .collection(Constants.COLLECTION_ULTIMA_CONVERSA_BD_NAME)
+        .doc(conversa.idDestinatario)
+        .set(conversa.toMap());
   }
+
+  Stream<QuerySnapshot> adicionarListenerMensagens(String idUserLogado ,String idDestinatario) {
+    var stream = firestore
+        .collection("mensagen")
+        .doc(idUserLogado)
+        .collection(idDestinatario)
+        .orderBy("time", descending: false)
+        .snapshots();
+
+    stream.listen((dados) {
+      _controller.add(dados);
+      Timer(const Duration(seconds: 1),(){
+      //  _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+      });
+    });
+    return _controller.stream;
+  }
+
+  //Salvar Imgaem
+
+  Future<UploadTask> salvarImagembd(String imagePath) async {
+
+    Reference reference = storage.ref();
+    Reference caminho = reference
+        .child(Constants.COLLECTION_CONVERSA_BD_NAME)
+        .child(verificarUsuarioLogado()!.uid)
+        .child(DateTime.now().toString() + ".jpg");
+
+    UploadTask task = caminho.putFile(File(imagePath));
+
+    return task;
+  }
+
+  Future<UploadTask> salvarImgPerfil(String arquivo) async {
+
+    Reference reference = storage.ref();
+    Reference caminho =
+    reference.child(Constants.COLLECTION_STORAGE_FOTO_PERFIL).child(" ${verificarUsuarioLogado()!.uid}.jpg");
+
+    UploadTask task = caminho.putFile(File(arquivo));
+
+     return task;
+  }
+
+}
+
+
 
 
 

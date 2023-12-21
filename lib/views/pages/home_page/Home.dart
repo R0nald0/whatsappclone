@@ -6,10 +6,11 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:whatsapp/GeraRotas.dart';
 import 'package:whatsapp/model/Usuario.dart';
-import 'package:whatsapp/views/pages/contato_page/AbaContato.dart';
-import 'package:whatsapp/views/pages/conversa_page/AbaConversa.dart';
 import 'package:whatsapp/views/pages/login_page/Login.dart';
 import 'package:whatsapp/views/pages/status_page/camera.dart';
+
+import '../aba_contato_page/AbaContato.dart';
+import '../aba_conversa_page/AbaConversa.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -65,10 +66,10 @@ class HomeState extends State<Home> with SingleTickerProviderStateMixin{
               iconMargin: EdgeInsets.only(left: 1),
             ),
             Tab(
-              child: Text('Converses'),
+              child: Text('Conversas'),
             ),
             Tab(
-              child: Text("Contacts"),
+              child: Text("Contatos"),
             )
           ],
         ),

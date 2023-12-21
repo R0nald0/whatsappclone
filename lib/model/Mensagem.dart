@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:whatsapp/controller/Banco.dart';
 
+import '../helper/Constants.dart';
+
 class Mensagem {
   late String _idRemetente;
   late String _msg;
@@ -25,15 +27,6 @@ class Mensagem {
 
   Mensagem();
 
-
-  salvarMensagem () async{
-     Banco bd = Banco();
-
-    await  bd.firestore.collection("mensagen").doc(this.idRemetente)
-        .collection(this.idDestinatario)
-        .add(this.toMap());
-  }
-
   Map<String, dynamic> toMap() {
     Map<String, dynamic> map = {
       "idRemetente": this._idRemetente,
@@ -47,8 +40,6 @@ class Mensagem {
 
     return map;
   }
-
-
 
 
   String get idRemetente => _idRemetente;

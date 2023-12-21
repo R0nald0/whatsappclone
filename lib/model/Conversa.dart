@@ -1,8 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'package:whatsapp/controller/Banco.dart';
-import 'package:whatsapp/helper/Constants.dart';
-
 
 class Conversa {
    String _idDestinatario ="";
@@ -16,16 +13,6 @@ class Conversa {
 
   Conversa(this._remetenteNome,this._idDestinatario,this._msg);
 
-
-  Future salvarConversaBd() async {
-    Banco bd = Banco();
-    await bd.firestore
-        .collection(Constants.COLLECTION_CONVERSA_BD_NAME)
-        .doc(this.idRemetente)
-        .collection(Constants.COLLECTION_ULTIMA_CONVERSA_BD_NAME)
-        .doc(this.idDestinatario)
-        .set(this.toMap());
-  }
 
   Map<String, dynamic> toMap() {
     Map<String, dynamic> map = {

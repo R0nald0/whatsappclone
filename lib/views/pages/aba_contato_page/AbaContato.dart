@@ -4,7 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:whatsapp/GeraRotas.dart';
 import 'package:whatsapp/helper/Helper.dart';
 import 'package:whatsapp/model/Contato.dart';
-import 'package:whatsapp/views/pages/contato_page/store/contact_bloc.dart';
+import 'package:whatsapp/views/pages/aba_contato_page/store/contact_bloc.dart';
+
 
 class AbaContato extends StatefulWidget{
   @override

@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:whatsapp/GeraRotas.dart';
 import 'package:whatsapp/controller/Banco.dart';
 import 'package:whatsapp/model/Contato.dart';
-import 'package:whatsapp/views/pages/cadastro_page/stream/cadastro_bloc.dart';
-import 'package:whatsapp/views/pages/conversa_page/stream/conversa_bloc.dart';
+import 'package:whatsapp/views/pages/aba_conversa_page/stream/conversa_bloc.dart';
+
+
 
 import '../../../model/Conversa.dart';
 
@@ -25,18 +25,18 @@ class AbaConversaState extends State<AbaConversa> {
   Banco db = Banco() ;
 
 
-  _verificarUsuarioLogado() async {
-     Banco auth = Banco() ;
-     User? usuario =  await auth.auth.currentUser;
-     if(usuario !=null){
-         userLogado = usuario.uid.toString();
-     }
-  }
+  // _verificarUsuarioLogado() async {
+  //    Banco auth = Banco() ;
+  //    User? usuario =  await auth._auth.currentUser;
+  //    if(usuario !=null){
+  //        userLogado = usuario.uid.toString();
+  //    }
+  // }
 
   @override
   void initState() {
     super.initState();
-    _verificarUsuarioLogado();
+ //   _verificarUsuarioLogado();
   }
 
   @override
@@ -78,15 +78,14 @@ class AbaConversaState extends State<AbaConversa> {
 
                 print("data" + querySnapshot.docs.length.toString());
                 return listaConversas(querySnapshot);
-              }else if(querySnapshot.docs.length == 0){
+              }else if(querySnapshot.docs.isEmpty){
                 return const Center(
                   child: Text("Você ainda não tem conversas"),
                 );
               }
 
           }
-
-          return Center(child: Text(""),);
+          return const Center(child: Text(""),);
         }
     );
   }

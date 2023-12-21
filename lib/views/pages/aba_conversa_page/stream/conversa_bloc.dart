@@ -29,7 +29,7 @@ class ConversaBloc extends Cubit<ConversaState> {
    }
 
   Future<Contato> getContactData(String idDestinatario) async{
-     return await _banco.recuperarContato(idDestinatario);
+     return await _banco.recuperarDadoContato(idDestinatario);
     }
    Future<void> deleteConversation(String idDestinatarioConversa) async{
        await _banco.deleteConversation(idDestinatarioConversa);

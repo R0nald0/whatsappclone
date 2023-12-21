@@ -1,11 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
+
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:whatsapp/GeraRotas.dart';
+import 'package:whatsapp/helper/Constants.dart';
 import 'package:whatsapp/model/Usuario.dart';
-import 'package:whatsapp/views/pages/home_page/Home.dart';
 import 'package:whatsapp/views/pages/cadastro_page/stream/cadastro_bloc.dart';
 import 'package:whatsapp/views/pages/cadastro_page/stream/cadastro_state.dart';
 import 'package:whatsapp/views/pages/login_page/stream/validate_fields.dart';
@@ -39,7 +38,7 @@ class cadastroState extends State<cadastro> {
             child: Column(
               children: <Widget>[
                 Image.asset(
-                  "images/usuario.png",
+                 Constants.IMGAGE_PATH_USARIO_ADD,
                   height: 200,
                   width: 150,
                 ),

@@ -1,10 +1,11 @@
 
 import 'package:flutter/material.dart';
+import 'package:whatsapp/model/Usuario.dart';
 import 'package:whatsapp/views/pages/home_page/Home.dart';
 import 'package:whatsapp/views/pages/login_page/Login.dart';
 import 'package:whatsapp/views/pages/cadastro_page/cadastro.dart';
 import 'package:whatsapp/views/pages/configuracao_page/telaConfiguracao.dart';
-import 'package:whatsapp/views/telaConversa.dart';
+import 'package:whatsapp/views/pages/conversa_page/telaConversa.dart';
 
 import 'model/Contato.dart';
 

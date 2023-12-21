@@ -12,8 +12,8 @@ class ValidateFieldsBloc extends Cubit<ValidateFiledsState>{
   ValidateFieldsBloc() : super(ValidateInitialState());
 
   void validateField(String email ,String password){
-    print("name ${email}");
-    print("senha ${password}");
+    print("name $email");
+    print("senha $password");
         if(email.isEmpty || !email.contains("@")){
            emit(ErrorValidateState(errorMessenger: "Email inválido,campo precisa conter @ e .com"));
            return ;
@@ -24,6 +24,7 @@ class ValidateFieldsBloc extends Cubit<ValidateFiledsState>{
         }
         logarUsuario(email,password);
   }
+
   Future<void> logarUsuario(String email, String senha) async{
        try{
           emit(LoadingState());

@@ -1,206 +1,141 @@
-import 'dart:io';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:whatsapp/GeraRotas.dart';
+import 'package:whatsapp/helper/Constants.dart';
 import 'package:whatsapp/model/Usuario.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:whatsapp/views/pages/configuracao_page/store/configuracao_bloc.dart';
+import 'package:whatsapp/views/pages/configuracao_page/store/configuracao_state.dart';
+
 
 class TelaConfiguracao extends StatefulWidget {
+  
+  const TelaConfiguracao({Key? key}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() => TelaConfiguracaoState();
 }
 
 class TelaConfiguracaoState extends State<TelaConfiguracao> {
-  FirebaseAuth _auth = FirebaseAuth.instance;
+  final _telaConfiguracaoBloc= ConfiguracaoBloc();
+  final TextEditingController _controllerNome = TextEditingController();
 
-  final ImagePicker _picker = ImagePicker();
-  XFile? _arquivo;
-  String UrlimgPerfil ="";
-  TextEditingController _controllerNome = TextEditingController();
-  late String _idUsuario;
-  bool isDownload = false;
-  late String _userNome = "";
-  late String _fotoPerfil ="";
 
-  Future recuperarImage(bool isCamera) async {
-    XFile? image;
-    if (isCamera) {
-      image = await _picker.pickImage(source: ImageSource.camera);
-    } else {
-      image = await _picker.pickImage(source: ImageSource.gallery);
-    }
-
-    setState(() {
-      _arquivo = image;
-    });
-
-    salvarImgPerfil();
-  }
-
-  Future salvarImgPerfil() async {
-    FirebaseStorage storage = FirebaseStorage.instance;
-
-    Reference reference = storage.ref();
-    Reference caminho =
-        reference.child("fotosPerfil").child(" ${_auth.currentUser?.uid}.jpg");
-
-    UploadTask task = caminho.putFile(File(_arquivo!.path));
-
-    task.snapshotEvents.listen((TaskSnapshot snapshot) {
-      if (snapshot.state == TaskState.running) {
-        setState(() {
-          isDownload = true;
-
-        });
-      } else if (snapshot.state == TaskState.success) {
-        setState(() {
-          isDownload = false;
-          _dowloadImagem(snapshot);
-        });
-      }
-    });
-  }
-
-  Future _dowloadImagem(TaskSnapshot snapshot) async {
-    String img = await snapshot.ref.getDownloadURL();
-    setState(() {
-      UrlimgPerfil = img;
-    });
-  }
-
-  Future _dadosUser() async {
-    FirebaseFirestore bd = FirebaseFirestore.instance;
-    DocumentSnapshot _snapshot =
-        await bd.collection("usuario").doc(_idUsuario).get();
-
-    setState(() {
-      _userNome = _snapshot.get("nome");
-      UrlimgPerfil = _snapshot.get("fotoPerfil");
-    });
-  }
-
-  Future _atulizarImgPerfil() async {
-    FirebaseFirestore bd = FirebaseFirestore.instance;
-
-    Map<String, dynamic> img = {
-      "fotoPerfil": UrlimgPerfil,
-      "nome": _controllerNome.text
-    };
-
-     if(img["nome"].toString().length == 0 ){
-          img["nome"] = _userNome;
-          bd.collection("usuario").doc(_idUsuario).update(img);
-         print("NOME " + img["nome"]);
-         final snackBar = SnackBar(
-             content: Text("Perfil Atualizado")
-         );
-         ScaffoldMessenger.of(context).showSnackBar(snackBar);
-     }else{
-
-       bd.collection("usuario").doc(_idUsuario).update(img);
-       final snackBar = SnackBar(
-           content: Text("Perfil Atualizado")
-       );
-       ScaffoldMessenger.of(context).showSnackBar(snackBar);
-
-     }
-
-  }
-
-  Future verificarUSer() async {
-    User? user = await _auth.currentUser;
-    if (user != null) {
-
-      setState(() {
-        _idUsuario = user.uid.toString();
-        _dadosUser();
-      });
-    } else {
-      print("dados usuario ivalido");
-    }
-  }
 
   @override
   void initState() {
-
     super.initState();
-    verificarUSer();
-
+    _telaConfiguracaoBloc.getDataUser();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Configurações"),
-        backgroundColor: Color(0xff075E54),
+        title: const Text("Configurações"),
+        backgroundColor: const Color(0xff075E54),
       ),
       body: Container(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Center(
             child: SingleChildScrollView(
           child: Column(
             children: <Widget>[
-                     isDownload == true? Center(child: CircularProgressIndicator()):
-                   Padding(
-                      padding: EdgeInsets.only(top: 10, bottom: 10),
-                      child: CircleAvatar(
-                        backgroundColor: Colors.grey,
-                        backgroundImage: UrlimgPerfil.length == 0?null:NetworkImage(UrlimgPerfil),
-                        radius: 150,
-                      ),
-                    ),
+                   BlocBuilder<ConfiguracaoBloc,ConfiguracaoState>(
+                     bloc: _telaConfiguracaoBloc,
+                     builder: (context, state) {
+                       if(state is ConfiguracaoLoadingState){
+                          return const Center(child: CircularProgressIndicator());
+                       }else if (state is ConfiguracaoUpdatedState){
+                         return Padding(
+                           padding: const EdgeInsets.only(top: 10, bottom: 10),
+                           child: CircleAvatar(
+                             backgroundColor: Colors.grey,
+                             backgroundImage: state.usuario.fotoPerfil.isNotEmpty
+                                 ?NetworkImage(state.usuario.fotoPerfil) as ImageProvider
+                                 :const AssetImage(Constants.IMGAGE_PATH_USARIO_ADD),
+                             radius: 150,
+                           ),
+                         );
+                       }else{
+                         return const Center(child: Text("No Image Profile"),);
+                       }
+                     }
+                   ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   TextButton(
                     onPressed: () {
-                      recuperarImage(true);
+                     _telaConfiguracaoBloc.recuperarImage(true);
                     },
-                    child: Text(
+                    child: const Text(
                       "Camera",
                       style: TextStyle(fontSize: 16),
                     ),
                   ),
                   TextButton(
                       onPressed: () {
-                        recuperarImage(false);
+                        _telaConfiguracaoBloc.recuperarImage(false);
                       },
-                      child: Text(
+                      child: const Text(
                         "Galeria",
                         style: TextStyle(fontSize: 16),
                       ))
                 ],
               ),
               Padding(
-                padding: EdgeInsets.only(top: 10, bottom: 16),
-                child: TextField(
-                  controller: _controllerNome,
-                  keyboardType: TextInputType.name,
-                  decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(32)),
-                      contentPadding: EdgeInsets.fromLTRB(32, 16, 32, 16),
-                      labelText: _userNome
+                padding: const EdgeInsets.only(top: 10, bottom: 16),
+                child: BlocBuilder<ConfiguracaoBloc,ConfiguracaoState>(
+                  bloc: _telaConfiguracaoBloc,
+                  builder: (context, state) {
+                      return TextField(
+                        controller: _controllerNome,
+                        keyboardType: TextInputType.name,
+                        decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(32)),
+                            contentPadding: const EdgeInsets.fromLTRB(32, 16, 32, 16),
+                            labelText: _telaConfiguracaoBloc.nameUser.isNotEmpty
+                                   ?_telaConfiguracaoBloc.nameUser
+                                   :"Digite seu nome"
+                        ),
+                      );
 
-                  ),
+                  }
                 ),
               ),
-              ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(32),
-                      ),
-                      padding: EdgeInsets.fromLTRB(32, 16, 32, 16)),
-                  onPressed: () {
-                    _atulizarImgPerfil();
+              BlocConsumer<ConfiguracaoBloc,ConfiguracaoState>(
+                bloc: _telaConfiguracaoBloc,
+                  listener: (BuildContext context, ConfiguracaoState state) {
+                     if(state is ConfiguracaoErrrolState){
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(state.errorMessenger))
+                        );
+                     }
                   },
-                  child: Text(
-                    "Salvar",
-                    style: TextStyle(fontSize: 17),
-                  ))
+                builder: (context, state) {
+                  if(state is ConfiguracaoLoadingState){
+                     return const Center(child: CircularProgressIndicator());
+                  }else{
+                    return ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(32),
+                            ),
+                            padding: const EdgeInsets.fromLTRB(32, 16, 32, 16)),
+                        onPressed: () {
+                          final usuario = Usuario();
+                          usuario.nome = _controllerNome.text;
+                          _telaConfiguracaoBloc.validateField(usuario);
+                          Navigator.pushNamedAndRemoveUntil(context, GerarRotas.ROUTE_HOME, (route) => false);
+                        },
+                        child: const Text(
+                          "Atualizar",
+                          style: TextStyle(fontSize: 17),
+                        ),);
+                     }
+                  },
+              )
             ],
           ),
         )),
