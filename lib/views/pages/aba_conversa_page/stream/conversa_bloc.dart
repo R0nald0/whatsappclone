@@ -7,8 +7,10 @@ import 'package:whatsapp/controller/Banco.dart';
 import 'package:whatsapp/model/Contato.dart';
 import 'package:whatsapp/model/Conversa.dart';
 
+import '../../../../main.dart';
+
 class ConversaBloc extends Cubit<ConversaState> {
-   final _banco = Banco();
+   final _banco = getIt.get<Banco>();
    final _controller = StreamController<QuerySnapshot>.broadcast();
   ConversaBloc() : super(ConversaInitialSate(conversas: []));
 

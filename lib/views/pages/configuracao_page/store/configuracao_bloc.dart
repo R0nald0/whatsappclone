@@ -6,9 +6,11 @@ import 'package:whatsapp/controller/Banco.dart';
 import 'package:whatsapp/model/Usuario.dart';
 import 'package:whatsapp/views/pages/configuracao_page/store/configuracao_state.dart';
 
+import '../../../../main.dart';
+
 
 class ConfiguracaoBloc extends Cubit<ConfiguracaoState>{
-  final  _banco = Banco();
+  final  _banco = getIt.get<Banco>();
   String uriImage = "";
   String nameUser = "";
 

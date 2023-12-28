@@ -2,8 +2,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:whatsapp/controller/Banco.dart';
 import 'package:whatsapp/model/Contato.dart';
 
+import '../../../../main.dart';
+
 class ContactBloc extends Cubit<ContactState>{
-  final _repository = Banco();
+  final _repository = getIt.get<Banco>();
   ContactBloc() : super(ContactIniteState());
 
   getAllContacts() async{

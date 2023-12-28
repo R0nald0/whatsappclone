@@ -1,9 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:whatsapp/controller/Banco.dart';
+import '../../../../main.dart';
 import 'home_bloc_state.dart';
 
 class HomeBloc  extends Cubit<HomeBlocState>{
-  final _banco = Banco();
+  final _banco = getIt.get<Banco>();
   HomeBloc() : super(HomeInitialState());
 
   getDataActialUser()async{

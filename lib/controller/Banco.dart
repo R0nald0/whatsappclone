@@ -11,20 +11,20 @@ import 'package:whatsapp/helper/Constants.dart';
 import 'package:whatsapp/model/Conversa.dart';
 import 'package:whatsapp/model/Mensagem.dart';
 import 'package:whatsapp/model/Usuario.dart';
-
 import '../model/Contato.dart';
 
 class Banco {
-  final auth = FirebaseAuth.instance;
-  final firestore =FirebaseFirestore.instance;
-  final storage = FirebaseStorage.instance;
+  FirebaseAuth auth ;
+  FirebaseFirestore firestore ;
+  FirebaseStorage storage ;
 
-  Banco();
+  Banco(this.auth,this.firestore,this.storage);
+
   final _controller =StreamController<QuerySnapshot>.broadcast();
 
   Future<String> login(String email, String senha)async{
       try{
-        await auth.signInWithEmailAndPassword(email: email, password: senha,);
+        await auth.signInWithEmailAndPassword(email: email, password: senha);
         return "Logando...";
       }catch(e){
          print(e);
@@ -73,37 +73,6 @@ class Banco {
     return user;
   }
 
-  Future<String> cadastrarUsuario(Usuario usuario)async {
-        try{
-         var  a= await auth.createUserWithEmailAndPassword(email: usuario.email, password: usuario.senha).
-              whenComplete(() async => await salvarUsuario(usuario));
-          return "Sucesso ao cadastrar";
-        }catch(execption){
-           if( execption is FirebaseAuthException){
-             print(execption);
-             throw FirebaseAuthException(message: "email inválido,altere o email", code: '1');
-           }
-           rethrow;
-         }
-        }
-
-  Future<String>  salvarUsuario(Usuario usuario) async {
-   try{
-     final userLogado = await verificarUsuarioLogado();
-      if(userLogado !=null){
-        await firestore.collection(Constants.COLLECTION_USUARIO_BD_NAME)
-            .doc(userLogado?.uid.toString())
-            .set(usuario.toMap());
-        return "usario salvo no fireestore";
-      }
-            return "usario null";
-   }catch(e){
-      if (kDebugMode) {
-        print(e);
-      }
-      rethrow;
-   }
- }
 
   Stream<QuerySnapshot> recuperarConversas( ) {
   var list =<Conversa>[];

@@ -10,6 +10,7 @@ import 'package:whatsapp/views/pages/aba_conversa_page/stream/conversa_bloc.dart
 
 
 
+import '../../../main.dart';
 import '../../../model/Conversa.dart';
 
 class AbaConversa extends StatefulWidget{
@@ -22,7 +23,7 @@ class AbaConversaState extends State<AbaConversa> {
   String userLogado = "";
   late String destinatarioId ;
   final conversaBloc = ConversaBloc();
-  Banco db = Banco() ;
+  Banco db = getIt.get<Banco>();
 
 
   // _verificarUsuarioLogado() async {

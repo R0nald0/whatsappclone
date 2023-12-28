@@ -8,6 +8,8 @@ import 'package:whatsapp/views/pages/aba_contato_page/store/contact_bloc.dart';
 
 
 class AbaContato extends StatefulWidget{
+  const AbaContato({Key? key}) : super(key: key);
+
   @override
   State<StatefulWidget> createState()=>AbaContatoState();
 }

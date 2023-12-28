@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:whatsapp/GeraRotas.dart';
+import 'package:whatsapp/main.dart';
 import 'package:whatsapp/model/Usuario.dart';
 import 'package:whatsapp/views/pages/login_page/Login.dart';
 import 'package:whatsapp/views/pages/status_page/camera.dart';
@@ -39,7 +40,7 @@ class HomeState extends State<Home> with SingleTickerProviderStateMixin{
   }
 
   Future deslogarUsuario() async{
-    await auth.signOut();
+     await auth.signOut();
       Navigator.pushNamedAndRemoveUntil(context, GerarRotas.ROUTE_LOGIN, (route) => false);
   }
 

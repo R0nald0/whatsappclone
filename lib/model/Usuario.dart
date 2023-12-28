@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import "package:flutter/material.dart";
 import 'package:whatsapp/controller/Banco.dart';
 
+import '../main.dart';
+
 class Usuario {
   late String _nome ="";
   late String _email ="";
@@ -12,7 +14,7 @@ class Usuario {
   Usuario();
 
    Future<Usuario> dadosUser(String idUsuario ) async {
-    Banco bd = Banco();
+    Banco bd = getIt.get<Banco>();
        DocumentSnapshot snapshot = await bd.firestore.collection("usuario").doc(idUsuario).get();
 
         Usuario usuario = Usuario();

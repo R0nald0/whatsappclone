@@ -9,12 +9,13 @@ import 'package:whatsapp/model/Contato.dart';
 import 'package:whatsapp/model/Mensagem.dart';
 
 import '../../../../helper/Helper.dart';
+import '../../../../main.dart';
 import '../../../../model/Conversa.dart';
 import '../../../../model/Usuario.dart';
 import 'tela_conversa_bloc_state.dart';
 
 class TelaConversaBloc extends Cubit<TelaConversaBlocState> {
-   final _banco = Banco();
+   final _banco = getIt.get<Banco>();
    XFile? arquivo;
 
   TelaConversaBloc() : super(TelaConversaInitState());

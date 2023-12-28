@@ -8,7 +8,7 @@ import 'package:whatsapp/views/pages/configuracao_page/store/configuracao_state.
 
 
 class TelaConfiguracao extends StatefulWidget {
-  
+
   const TelaConfiguracao({Key? key}) : super(key: key);
 
   @override

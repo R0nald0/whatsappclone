@@ -1,11 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:whatsapp/GeraRotas.dart';
-import 'package:whatsapp/model/Usuario.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:whatsapp/main.dart';
 import 'package:whatsapp/views/pages/login_page/stream/validate_fields.dart';
 
 class Login extends StatefulWidget {
@@ -16,20 +16,16 @@ class LoginState extends State<Login> {
 
   final TextEditingController _controllerEmail =TextEditingController();
   final TextEditingController _controllerSenha = TextEditingController();
-  final validateFields = ValidateFieldsBloc();
+  final validateFields = getIt.get<ValidateFieldsBloc>();
 
-  Future vericarUsuarioLogado()  async{
-    FirebaseAuth auth =FirebaseAuth.instance;
-    User user =  await auth.currentUser!;
-    if(user != null){
-       Navigator.pushNamedAndRemoveUntil(context, GerarRotas.ROUTE_HOME,(route) => false);
-    }
-  }
 
   @override
   void initState() {
       super.initState();
-      vericarUsuarioLogado();
+
+      if(validateFields.verificarUsuraioLogado() != null){
+        Navigator.pushNamedAndRemoveUntil(context, GerarRotas.ROUTE_HOME,(route) => false);
+      }
   }
 
   @override

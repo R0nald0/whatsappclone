@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:whatsapp/GeraRotas.dart';
 import 'package:whatsapp/helper/Constants.dart';
+import 'package:whatsapp/main.dart';
 import 'package:whatsapp/model/Usuario.dart';
 import 'package:whatsapp/views/pages/cadastro_page/stream/cadastro_bloc.dart';
 import 'package:whatsapp/views/pages/cadastro_page/stream/cadastro_state.dart';
@@ -19,7 +20,7 @@ class cadastroState extends State<cadastro> {
   TextEditingController _controllerEmail = TextEditingController();
   TextEditingController _controllerSenha = TextEditingController();
   final _forkey = GlobalKey<FormState>();
-  final _cadastroBloc = CadastroBloc();
+  final _cadastroBloc = getIt.get<CadastroBloc>();
 
   @override
   Widget build(BuildContext context) {

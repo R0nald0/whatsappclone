@@ -1,15 +1,23 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:whatsapp/controller/Banco.dart';
+import 'package:whatsapp/data/repository/irepository_user.dart';
+import 'package:whatsapp/data/repository/repositoryimpl/user_repository_impl.dart';
+import 'package:whatsapp/main.dart';
 
 import '../../../../model/Usuario.dart';
 
 class ValidateFieldsBloc extends Cubit<ValidateFiledsState>{
-  final repositoryLogin = Banco();
   bool isValideEmail = false;
   bool isValidePassword = false;
+  IReposioryUser userRepository ;
 
-  ValidateFieldsBloc() : super(ValidateInitialState());
+
+  ValidateFieldsBloc(this.userRepository) : super(ValidateInitialState());
+
+  User? verificarUsuraioLogado(){
+    return userRepository.verificarUsuarioLogado();
+  }
 
   void validateField(String email ,String password){
     print("name $email");
@@ -28,7 +36,7 @@ class ValidateFieldsBloc extends Cubit<ValidateFiledsState>{
   Future<void> logarUsuario(String email, String senha) async{
        try{
           emit(LoadingState());
-          await repositoryLogin.login(email,senha);
+          await userRepository.loginUser(email,senha);
           emit(SuccessState());
        }catch(e){
           emit(ErrorValidateState(errorMessenger: "Erro ao logar usuario"));
