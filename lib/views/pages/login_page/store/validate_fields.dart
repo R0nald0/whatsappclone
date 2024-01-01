@@ -20,8 +20,6 @@ class ValidateFieldsBloc extends Cubit<ValidateFiledsState>{
   }
 
   void validateField(String email ,String password){
-    print("name $email");
-    print("senha $password");
         if(email.isEmpty || !email.contains("@")){
            emit(ErrorValidateState(errorMessenger: "Email inválido,campo precisa conter @ e .com"));
            return ;

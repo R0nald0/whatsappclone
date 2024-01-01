@@ -3,8 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../model/Usuario.dart';
 
 class AuthenticationService{
-  FirebaseAuth _auth ;
-
+  final FirebaseAuth _auth ;
   AuthenticationService(this._auth);
 
   Future<String> login(String email, String senha)async{

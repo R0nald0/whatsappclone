@@ -1,5 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:whatsapp/controller/Banco.dart';
+
 import 'package:whatsapp/data/repository/irepository_user.dart';
 import 'package:whatsapp/data/service/authentication_service.dart';
 import 'package:whatsapp/model/Usuario.dart';
@@ -33,10 +33,6 @@ class UserRepositoryImpl implements IReposioryUser {
     // TODO: implement logoutUser
   }
 
-  @override
-  void verifyUserLogin() {
-    // TODO: implement verifyUserLogin
-  }
 
   @override
   Future<String?> cadastrarUsuario(Usuario usuario) async {

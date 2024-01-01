@@ -8,7 +8,8 @@ import 'package:whatsapp/main.dart';
 import 'package:whatsapp/model/Usuario.dart';
 import 'package:whatsapp/views/pages/cadastro_page/stream/cadastro_bloc.dart';
 import 'package:whatsapp/views/pages/cadastro_page/stream/cadastro_state.dart';
-import 'package:whatsapp/views/pages/login_page/stream/validate_fields.dart';
+
+import '../login_page/store/validate_fields.dart';
 
 class cadastro extends StatefulWidget {
   @override

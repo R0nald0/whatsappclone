@@ -6,7 +6,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/foundation.dart';
+
 import 'package:whatsapp/helper/Constants.dart';
 import 'package:whatsapp/model/Conversa.dart';
 import 'package:whatsapp/model/Mensagem.dart';
@@ -44,7 +44,7 @@ class Banco {
   Future<Usuario> recuperarUsuario(User user) async{
 
     Usuario usuario = Usuario();
-           DocumentSnapshot dados = await firestore.collection(Constants.COLLECTION_USUARIO_BD_NAME).doc(user.uid).get();
+          DocumentSnapshot dados = await firestore.collection(Constants.COLLECTION_USUARIO_BD_NAME).doc(user.uid).get();
 
           usuario.nome = dados.get("nome");
           usuario.email = dados.get("email");
