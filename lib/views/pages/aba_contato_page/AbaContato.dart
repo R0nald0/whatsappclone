@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:whatsapp/GeraRotas.dart';
 import 'package:whatsapp/helper/Helper.dart';
 import 'package:whatsapp/model/Contato.dart';
+import 'package:whatsapp/model/Conversa.dart';
 import 'package:whatsapp/views/pages/aba_contato_page/store/contact_bloc.dart';
 
 
@@ -60,7 +61,7 @@ class AbaContatoState extends State<AbaContato> {
                            Navigator.pushNamed(
                                context,
                                GerarRotas.ROUTE_CONVERSA
-                               ,arguments: contato
+                               ,arguments: contato,
                            );
                          },
                        );

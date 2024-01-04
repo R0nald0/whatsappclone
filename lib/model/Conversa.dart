@@ -11,7 +11,7 @@ class Conversa {
    String _urlImagenConversa ="";
    String _data ="";
 
-  Conversa(this._remetenteNome,this._idDestinatario,this._msg);
+  Conversa(this._idRemetente,this._idDestinatario,this._msg);
 
 
   Map<String, dynamic> toMap() {

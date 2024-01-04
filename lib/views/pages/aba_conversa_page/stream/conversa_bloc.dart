@@ -1,49 +1,43 @@
 
-
-
 import 'dart:async';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:whatsapp/controller/Banco.dart';
 import 'package:whatsapp/model/Contato.dart';
 import 'package:whatsapp/model/Conversa.dart';
-
+import '../../../../data/repository/IContactRepository.dart';
 import '../../../../data/repository/i_conversa_repository.dart';
-import '../../../../main.dart';
 
 class ConversaBloc extends Cubit<ConversaState> {
-   final _banco = getIt.get<Banco>();
+
    final IConversaRepository _conversaRepository;
-   final _controller = StreamController<List<Conversa>>.broadcast();
-   ConversaBloc(this._conversaRepository) : super(ConversaInitialSate(conversas: []));
+   final IContactRepository _contactRepository;
+   ConversaBloc(this._conversaRepository, this._contactRepository) : super(ConversaInitialSate(conversas: []));
 
-
-      getAllConversations() {
-    /*try{
-     emit(ConvesarLoadingState(conversas:[]));
-        _banco.recuperarConversas();
-      var listConversations = <Conversa>[];
-       print("lista de conversas ${ listConversations.length}");
-      emit(ConvesarLoadedState(conversas: []));
+  Future<Contato> getContactData(String contactId) async{
+     try{
+      return  await _contactRepository.getContactData(contactId);
+     }catch (exception){
+       rethrow;
+     }
+   }
+   getAllConversations() async {
+    try{
+         emit(ConvesarLoadingState(conversas:[]));
+         await _conversaRepository.getAllConversations().listen((event) {
+         emit(ConvesarLoadedState(conversas: event));
+      });
      }catch(e){
         print(e);
-        emit(ConvesarErrorState(conversas:[], errorMessenger:"Falha ao recuperar lista de conversas"));
-        rethrow;
-     }*/
-     emit(ConvesarLoadingState(conversas:[]));
-     _conversaRepository.getAllConversations().listen((event) {
-         emit(ConvesarLoadedState(conversas: event));
-     });
-
+        emit(ConvesarErrorState(errorMessenger:"Falha ao recuperar lista de conversas"));
+     }
    }
-
-  Future<Contato> getContactData(String idDestinatario) async{
-     return await _banco.recuperarDadoContato(idDestinatario);
-    }
-   Future<void> deleteConversation(String idDestinatarioConversa) async{
-      //emit(ConvesarLoadingState(conversas: []));
-     //  await _conversaRepository.deleteConversation(idDestinatarioConversa,idUserLogged );
+   Future<void> deleteConversation(String idDestinatarioConversa,String remetenteId) async{
+      try{
+        emit(ConvesarLoadingState(conversas: []));
+        await _conversaRepository.deleteConversation(idDestinatarioConversa,remetenteId);
+        emit(ConvesarSucessState(sucessMessager: 'Conversa Deletada'));
+      }catch(exeption){
+        emit(ConvesarErrorState(errorMessenger: '${exeption} erro Deletada'));
+      }
    }
 
    void destroyListen(){
@@ -64,7 +58,7 @@ class ConversaInitialSate extends ConversaState{
 }
 
 class ConvesarLoadingState extends ConversaState {
-   final conversas ;
+  final conversas ;
   ConvesarLoadingState({required this.conversas}) : super( conversas:conversas);
 
 }
@@ -75,8 +69,13 @@ class ConvesarLoadedState extends ConversaState {
 
 }
 
+class ConvesarSucessState extends ConversaState {
+  final String sucessMessager;
+  ConvesarSucessState({required this.sucessMessager}) : super(conversas :[]);
+
+}
+
 class ConvesarErrorState extends ConversaState {
-  List<Conversa> conversas ;
   final errorMessenger ;
-  ConvesarErrorState({required this.conversas,required this.errorMessenger}) : super( conversas : conversas);
+  ConvesarErrorState({required this.errorMessenger}) : super( conversas :[]);
 }

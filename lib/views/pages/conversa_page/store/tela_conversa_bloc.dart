@@ -8,108 +8,82 @@ import 'package:whatsapp/controller/Banco.dart';
 import 'package:whatsapp/model/Contato.dart';
 import 'package:whatsapp/model/Mensagem.dart';
 
+import '../../../../data/repository/IContactRepository.dart';
+import '../../../../data/repository/I_message_repository.dart';
 import '../../../../helper/Helper.dart';
 import '../../../../main.dart';
-import '../../../../model/Conversa.dart';
-import '../../../../model/Usuario.dart';
 import 'tela_conversa_bloc_state.dart';
 
 class TelaConversaBloc extends Cubit<TelaConversaBlocState> {
    final _banco = getIt.get<Banco>();
    XFile? arquivo;
+    var listMessenger = <Mensagem>[];
+   final IContactRepository _contactRepository;
+   final IMessageRepository _messageRepository;
+   var isDownloading = false;
 
-  TelaConversaBloc() : super(TelaConversaInitState());
+  TelaConversaBloc(this._contactRepository,this._messageRepository) : super(TelaConversaInitState());
 
    salvarUltimaMensagemConversa(Mensagem mensagem,Contato contato) async{
-   final user = _banco.verificarUsuarioLogado();
-    if(user !=null){
-      Usuario usuario = await Usuario().dadosUser(user.uid);
-      Conversa cRementent = Conversa(
-          mensagem.idRemetente,
-          mensagem.idDestinatario,
-          mensagem.url
-      );
-
-      cRementent.data = mensagem.data;
-      cRementent.idDestinatario = mensagem.idDestinatario;
-      cRementent.idRemetente = mensagem.idRemetente;
-      cRementent.urlImagenConversa = mensagem.url;
-      cRementent.tipo = mensagem.tipo;
-      cRementent.msg = mensagem.msg;
-      cRementent.fotoUrl =contato.foto;
-      cRementent.remetenteNome = contato.nome;
-
-      await _banco.salvarUltimaMensagemBd(cRementent);
-
-      Conversa cDestinatrio = Conversa(
-          mensagem.idRemetente,
-          mensagem.idDestinatario,
-          mensagem.url
-      );
-      cDestinatrio.idDestinatario = mensagem.idRemetente;
-      cDestinatrio.idRemetente = mensagem.idDestinatario;
-      cDestinatrio.tipo = mensagem.tipo;
-      cDestinatrio.urlImagenConversa = mensagem.url;
-      cDestinatrio.msg = mensagem.msg;
-      cDestinatrio.fotoUrl = usuario.fotoPerfil;
-      cDestinatrio.remetenteNome = usuario.nome;
-      cDestinatrio.data = mensagem.data;
-      await _banco.salvarUltimaMensagemBd(cDestinatrio);
-    }
-
-
+     try{
+       await  _messageRepository.salvarUltimaMensagemConversa(mensagem, contato);
+     }catch(exception){
+       emit(TelaConversaErrortState(errorMessenger: "$exception"));
+     }
   }
 
-   enviarMensagem( String textoMensagem,String idRemetente,Contato destinatario, {url})  async{
+   enviarMensagem( Mensagem mensagem,Contato destinatario)  async{
     try{
-      if (textoMensagem.isNotEmpty) {
-         final mensagem = Mensagem();
-         mensagem.tipo = "texto";
-         mensagem.msg = textoMensagem;
-         mensagem.data = Helper.formatarData(DateTime.now().toString());
-         mensagem.idRemetente = idRemetente;
-         mensagem.idDestinatario = destinatario.idContato;
-         mensagem.time = Timestamp.now().toString();
-         mensagem.url = "";
-
-        await _banco.salvarRemetenteMensagem(mensagem);
-        await _banco.salvarDestinatarioMensagem(mensagem);
-
-       salvarUltimaMensagemConversa(mensagem,destinatario);
+      if (mensagem.msg.isNotEmpty && mensagem.idRemetente.isNotEmpty && mensagem.idDestinatario.isNotEmpty) {
+        await _messageRepository.saveMessager(mensagem);
+        salvarUltimaMensagemConversa(mensagem,destinatario);
+      }else{
+        emit(TelaConversaErrortState(errorMessenger: "remetente vazio ou mensagem vazia"));
       }
     }catch(e){
-       emit(TelaConversaErrortState(errorMessenger: "Não conseguimos enviar a msg"));
+       emit(TelaConversaErrortState(errorMessenger: "$e"));
     }
   }
 
-   listenerMenssagens(String idDestinatario){
-    final user  = _banco.verificarUsuarioLogado();
-    return _banco.adicionarListenerMensagens(user!.uid, idDestinatario);
+ Future<void>  listenerMenssagens(String idRemetente,String idDestinatario) async{
+      try{
+         emit(TelaConversaLoadingState());
+         final contact  = await _contactRepository.getContactData(idDestinatario);
+         await _messageRepository.getAllMessagesFromConversation(idRemetente, idDestinatario).listen((event) {
+              listMessenger = event;
+             emit(TelaConversaLoadedMessangetState(mensagem: event));
+         });
+      }catch(exeption){
+        emit(TelaConversaErrortState(errorMessenger: "$exeption"));
+      }
   }
 
    destroyListener(){
        _banco.destroyListen();
    }
 
-   salvarImageBd(String imagePath,Contato contato) async{
+   salvarImageBd(String imagePath,Contato contato,String idUsarioLogado) async{
+
      final task =  await _banco.salvarImagembd(imagePath);
      task.snapshotEvents.listen((TaskSnapshot snapshot) {
        if (snapshot.state == TaskState.running) {
-            emit(TelaConversaLoadingState());
+         TelaConversaLoadingImageState();
        } else if (snapshot.state == TaskState.success) {
-            dowloadImage(snapshot,contato);
+
+            dowloadImage(snapshot,contato,idUsarioLogado);
        }
      });
    }
 
-   Future dowloadImage(TaskSnapshot snapshot,Contato contato) async {
+   Future dowloadImage(TaskSnapshot snapshot,Contato contato,String idUsarioLogado) async {
+     TelaConversaLoadingImageState();
      String uri = await snapshot.ref.getDownloadURL();
 
     final mensagem = Mensagem();
      mensagem.tipo = "imagem";
      mensagem.msg = "";
      mensagem.data =Helper.formatarData(DateTime.now().toString());
-     mensagem.idRemetente = _banco.verificarUsuarioLogado()!.uid;
+     mensagem.idRemetente = idUsarioLogado;
      mensagem.idDestinatario = contato.idContato;
      mensagem.time = Timestamp.now().toString();
      mensagem.url = uri;
@@ -117,12 +91,11 @@ class TelaConversaBloc extends Cubit<TelaConversaBlocState> {
      await _banco.salvarRemetenteMensagem(mensagem);
      await _banco.salvarDestinatarioMensagem(mensagem);
      salvarUltimaMensagemConversa(mensagem,contato);
-     emit(TelaConversaLoadedState(mensagem:mensagem));
-
+     isDownloading = false;
      // telaConversaBloc.saveMessenger(_mensagem, widget.contatocv);
    }
 
-   Future enviarImagem(bool isCamera,Contato contato) async {
+   Future enviarImagem(bool isCamera,Contato contato,String idUsarioLogado) async {
      final  picker = ImagePicker();
 
      if (isCamera) {
@@ -132,10 +105,12 @@ class TelaConversaBloc extends Cubit<TelaConversaBlocState> {
      }
 
      if(arquivo !=null){
-       emit(TelaConversaLoadingState());
-        await salvarImageBd(arquivo!.path,contato);
+       isDownloading = true;
+
+        await salvarImageBd(arquivo!.path,contato,idUsarioLogado);
      }else{
        emit(TelaConversaErrortState(errorMessenger: "Nenhuma imagem selecionada"));
+       emit(TelaConversaLoadedMessangetState(mensagem: listMessenger));
      }
    }
 
@@ -147,7 +122,10 @@ class TelaConversaBloc extends Cubit<TelaConversaBlocState> {
            return null;
          }
    }
+
+
 }
+
 
 
 

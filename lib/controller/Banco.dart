@@ -120,7 +120,7 @@ class Banco {
     for(QueryDocumentSnapshot item  in snapshot.docs){
       if(item.get("email") == verificarUsuarioLogado()?.email) continue;
 
-       Contato contato = Contato();
+        Contato contato = Contato();
         contato.nome=item.get("nome");
         contato.email=item.get("email");
         contato.foto=item.get('fotoPerfil');

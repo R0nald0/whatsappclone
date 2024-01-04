@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:whatsapp/model/Conversa.dart';
 import 'package:whatsapp/model/Usuario.dart';
 import 'package:whatsapp/views/pages/home_page/Home.dart';
 import 'package:whatsapp/views/pages/login_page/Login.dart';
@@ -17,6 +18,7 @@ class GerarRotas {
   static const ROUTE_CONVERSA ="/conversa";
 
   static var args;
+
 
   static Route<dynamic>? inicializarRotas(RouteSettings settings) {
 
@@ -43,7 +45,7 @@ class GerarRotas {
             break;
 
       case ROUTE_CONVERSA:
-        return MaterialPageRoute(builder: (context)=> TelaConversa(args)
+        return MaterialPageRoute(builder: (context)=> TelaConversa(contato: args)
         );
         break;
 

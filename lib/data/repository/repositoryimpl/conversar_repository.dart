@@ -10,6 +10,7 @@ class ConversaRepository implements IConversaRepository{
     final Banco _banco;
     final DatabaseService _databaseService;
     final AuthenticationService _authenticationService;
+
     ConversaRepository(this._banco,this._authenticationService, this._databaseService);
 
     @override
@@ -23,11 +24,10 @@ class ConversaRepository implements IConversaRepository{
         print(e);
         rethrow;
      }
-      //return _databaseService.recuperarConversas();
     }
 
-   @override
-  Future<void> deleteConversation(String idDestinatarioConversa,String userLoggedId) async{
+    @override
+    Future<void> deleteConversation(String idDestinatarioConversa,String userLoggedId) async{
           try{
                await _databaseService.deleteConversation(idDestinatarioConversa, userLoggedId);
           }
@@ -36,8 +36,8 @@ class ConversaRepository implements IConversaRepository{
           }
     }
 
-    @override
-  destroyListen(){
+     @override
+    destroyListen(){
        _banco.destroyListen();
     }
 }

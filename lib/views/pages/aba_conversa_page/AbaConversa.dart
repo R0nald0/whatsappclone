@@ -1,16 +1,11 @@
 
-
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:whatsapp/GeraRotas.dart';
-import 'package:whatsapp/model/Contato.dart';
+import 'package:whatsapp/helper/Constants.dart';
 import 'package:whatsapp/model/Conversa.dart';
 import 'package:whatsapp/views/pages/aba_conversa_page/stream/conversa_bloc.dart';
-
-
-
+import 'package:whatsapp/views/pages/conversa_page/telaConversa.dart';
 import '../../../main.dart';
 
 class AbaConversa extends StatefulWidget{
@@ -107,14 +102,13 @@ class AbaConversaState extends State<AbaConversa> {
         child:ListView.builder(
             itemCount: query.length,
             itemBuilder: (context,index){
-             // List<DocumentSnapshot> conversa = query.docs.toList();
               Conversa conversaItem = query[index];
 
               return Dismissible(
-                key: Key(conversaItem.idRemetente /*conversaItem["idDestinatario"]*/),
+                key: Key(conversaItem.idRemetente),
                 onDismissed: (direction){
                   if(DismissDirection.endToStart == direction){
-                         conversaBloc.deleteConversation(conversaItem.idDestinatario /*conversaItem["idDestinatario"]*/);
+                         conversaBloc.deleteConversation(conversaItem.idDestinatario,conversaItem.idRemetente);
                   }
                 },
                 child: Card(
@@ -123,8 +117,9 @@ class AbaConversaState extends State<AbaConversa> {
                   child: ListTile(
                     contentPadding: const EdgeInsets.fromLTRB(16,8,16,8),
                     leading: CircleAvatar(
-                     // backgroundImage: NetworkImage(conversaItem["fotoUrlRemetente"]),
-                      backgroundImage: NetworkImage(conversaItem.fotoUrl/*conversaItem["fotoUrlRemetente"]*/),
+                      backgroundImage: conversaItem.fotoUrl.isEmpty
+                          ?const AssetImage(Constants.IMGAGE_PATH_USARIO_ADD) as ImageProvider
+                          : NetworkImage(conversaItem.fotoUrl),
                       backgroundColor: Colors.grey,
                       maxRadius: 35,
                     ),
@@ -137,25 +132,25 @@ class AbaConversaState extends State<AbaConversa> {
                          ],
                         ),
 
-                    title:   Text(conversaItem.remetenteNome/*conversaItem["remetenteNome"]*/,
+                    title:   Text(conversaItem.remetenteNome,
                       style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 15
                       ),
                     ),
                     subtitle: Container(
-                      child:  conversaItem.tipo/*conversaItem["tipo"]*/=="texto"?Text(conversaItem.urlImagenConversa/*conversaItem["UltimaMsg"]*/)
-                          :  const Padding(padding: EdgeInsets.only(right:225,top: 10),
+                      child:  conversaItem.tipo=="texto"
+                          ?Text(conversaItem.msg)
+                          : const Padding(padding: EdgeInsets.only(right:225,top: 10),
                                    child:Icon(Icons.image_rounded) ,)
                     ),
 
                     onTap: () async{
-                         destinatarioId = conversaItem.idDestinatario/*conversaItem["idDestinatario"]*/;
-                         Contato contatoCv =  await conversaBloc.getContactData(destinatarioId);
+                        final contato =await conversaBloc.getContactData(conversaItem.idDestinatario);
                          Navigator.pushNamed(
                              context,
-                             GerarRotas.ROUTE_CONVERSA
-                             ,arguments: contatoCv
+                             GerarRotas.ROUTE_CONVERSA,
+                              arguments: contato
                          );
                     },
                   ),

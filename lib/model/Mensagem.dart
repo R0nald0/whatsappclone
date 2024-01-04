@@ -41,6 +41,17 @@ class Mensagem {
     return map;
   }
 
+  Mensagem.fromMap(DocumentSnapshot<Map<String,dynamic>> map){
+    _idRemetente= map["idRemetente"];
+    url= map["url"];
+    tipo= map["tipo"];
+    _msg= map["mensagem"];
+    _idDestinatario= map["idDestinatario"];
+    data= map["data"];
+    _time= map["time"];
+
+  }
+
 
   String get idRemetente => _idRemetente;
 

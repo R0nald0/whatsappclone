@@ -53,6 +53,7 @@ class UserRepositoryImpl implements IReposioryUser {
     }
   }
 
+  @override
   User? verificarUsuarioLogado() {
     User? user =  _authenticationService.verificarUsuarioLogado();
     return user;
