@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:whatsapp/GeraRotas.dart';
+import 'package:whatsapp/helper/Constants.dart';
 import 'package:whatsapp/helper/Helper.dart';
 import 'package:whatsapp/model/Contato.dart';
 import 'package:whatsapp/model/Conversa.dart';
@@ -49,7 +50,9 @@ class AbaContatoState extends State<AbaContato> {
                        return ListTile(
                          contentPadding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                          leading: CircleAvatar(
-                           backgroundImage:NetworkImage(contato.foto),
+                           backgroundImage:contato.foto.isEmpty
+                                ?const AssetImage(Constants.IMGAGE_PATH_USARIO_ADD) as ImageProvider
+                                : NetworkImage(contato.foto),
                            maxRadius: 30,
                            backgroundColor: Colors.green,
                          ),
