@@ -12,6 +12,7 @@ import '../../model/Usuario.dart';
 
 class DatabaseService{
    final FirebaseFirestore _firestore ;
+
    DatabaseService(this._firestore);
    final _controller =StreamController<List<Conversa>>.broadcast();
    final _controllerConversa =StreamController<List<Mensagem>>.broadcast();
@@ -51,9 +52,11 @@ class DatabaseService{
         .delete()
         .whenComplete(() =>
         _firestore.
-        collection(Constants.COLLECTION_MENSAGEM_BD_NAME)
+             collection(Constants.COLLECTION_MENSAGEM_BD_NAME)
             .doc(uuidUser)
             .collection(idDestinatarioConversa)
+            .doc("unique_messeger").delete()
+
     );
   }
 
@@ -102,6 +105,7 @@ class DatabaseService{
          .collection(Constants.COLLECTION_MENSAGEM_BD_NAME)
          .doc(idUserLogado)
          .collection(idDestinatario)
+
          .orderBy("time", descending: false)
          .snapshots().listen((event) {
            final list = event.docs.map((element) =>Mensagem.fromMap(element)).toList();
@@ -116,9 +120,10 @@ class DatabaseService{
          .collection(Constants.COLLECTION_MENSAGEM_BD_NAME)
          .doc(mensagem.idRemetente)
          .collection(mensagem.idDestinatario)
+         .doc("unique_messeger")
      //.doc(Constants.COLLECTION_MENSAGEM_BD_NAME)
-     // .set(mensagem.toMap());
-         .add(mensagem.toMap());
+         .set(mensagem.toMap());
+        // .add(mensagem.toMap());
    }
 
    Future  salvarDestinatarioMensagem (Mensagem mensagem) async{
@@ -126,9 +131,10 @@ class DatabaseService{
          .collection(Constants.COLLECTION_MENSAGEM_BD_NAME)
          .doc(mensagem.idDestinatario)
          .collection(mensagem.idRemetente)
+        .doc("unique_messeger")
      //.doc(Constants.COLLECTION_MENSAGEM_BD_NAME)
-     // .set(mensagem.toMap());
-         .add(mensagem.toMap());
+        .set(mensagem.toMap());
+         //.add(mensagem.toMap());
    }
 
    Future salvarUltimaMensagemBd(Conversa conversa) async {
@@ -138,6 +144,11 @@ class DatabaseService{
          .collection(Constants.COLLECTION_ULTIMA_CONVERSA_BD_NAME)
          .doc(conversa.idDestinatario)
          .set(conversa.toMap());
+   }
+
+   destroyListenser(){
+      _controllerConversa.close();
+      _controller.close();
    }
 
 }

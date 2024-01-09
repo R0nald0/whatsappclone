@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:whatsapp/GeraRotas.dart';
 import 'package:whatsapp/helper/Constants.dart';
 import 'package:whatsapp/model/Conversa.dart';
-import 'package:whatsapp/views/pages/aba_conversa_page/stream/conversa_bloc.dart';
+import 'package:whatsapp/views/pages/aba_conversa_page/store/conversa_bloc.dart';
 import 'package:whatsapp/views/pages/conversa_page/telaConversa.dart';
 import '../../../main.dart';
 
