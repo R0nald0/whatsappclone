@@ -18,8 +18,9 @@ import 'package:whatsapp/data/repository/repositoryimpl/conversar_repository.dar
 import 'package:whatsapp/data/repository/repositoryimpl/messager_repository.dart';
 import 'package:whatsapp/data/service/authentication_service.dart';
 import 'package:whatsapp/data/service/database_service.dart';
+import 'package:whatsapp/data/service/storage_service.dart';
 import 'package:whatsapp/firebase_options.dart';
-import 'package:whatsapp/views/pages/aba_conversa_page/stream/conversa_bloc.dart';
+import 'package:whatsapp/views/pages/aba_conversa_page/store/conversa_bloc.dart';
 import 'package:whatsapp/views/pages/cadastro_page/stream/cadastro_bloc.dart';
 import 'package:whatsapp/views/pages/conversa_page/store/tela_conversa_bloc.dart';
 import 'package:whatsapp/views/pages/login_page/Login.dart';
@@ -34,6 +35,8 @@ void setupGetIt() {
   getIt.registerSingleton<FirebaseStorage>(FirebaseStorage.instance);
   getIt.registerSingleton<AuthenticationService>(AuthenticationService( getIt.get<FirebaseAuth>()));
   getIt.registerSingleton<DatabaseService>(DatabaseService( getIt.get<FirebaseFirestore>()));
+  getIt.registerSingleton<StorageService>(StorageService(getIt.get<FirebaseStorage>()));
+
   getIt.registerSingleton<Banco>(Banco(
       getIt.get<FirebaseAuth>(),
       getIt.get<FirebaseFirestore>(),
@@ -56,6 +59,7 @@ void setupGetIt() {
 
   getIt.registerSingleton<IMessageRepository>(MessengerRepository(
     getIt.get<DatabaseService>(),
+    getIt.get<StorageService>()
   ));
 
 
@@ -70,7 +74,8 @@ void setupGetIt() {
   ));
   getIt.registerSingleton<TelaConversaBloc>(TelaConversaBloc(
       getIt.get<IContactRepository>(),
-      getIt.get<IMessageRepository>()
+      getIt.get<IMessageRepository>(),
+      getIt.get<IReposioryUser>()
   ));
 
 
