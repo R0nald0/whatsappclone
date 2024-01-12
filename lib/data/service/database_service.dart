@@ -1,9 +1,8 @@
 import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
-
+import 'package:uuid/v4.dart';
 import '../../helper/Constants.dart';
 import '../../model/Contato.dart';
 import '../../model/Conversa.dart';
@@ -43,21 +42,27 @@ class DatabaseService{
        return _controller.stream;
      }
 
-  Future<void> deleteConversation(String idDestinatarioConversa,String uuidUser) async {
-    await _firestore
-        .collection(Constants.COLLECTION_CONVERSA_BD_NAME)
+   Future<void> deleteConversation(String idDestinatarioConversa,String uuidUser) async {
+
+   await _firestore.collection(Constants.COLLECTION_MENSAGEM_BD_NAME)
         .doc(uuidUser)
-        .collection(Constants.COLLECTION_ULTIMA_CONVERSA_BD_NAME)
-        .doc(idDestinatarioConversa)
-        .delete()
-        .whenComplete(() =>
-        _firestore.
-             collection(Constants.COLLECTION_MENSAGEM_BD_NAME)
+        .collection(idDestinatarioConversa)
+        .get().then((value){
+        var map   = value.docs.map((e) => Mensagem.fromQuerySnap(e)).toList();
+        map.forEach((element) {
+          _firestore.collection(Constants.COLLECTION_MENSAGEM_BD_NAME)
             .doc(uuidUser)
             .collection(idDestinatarioConversa)
-            .doc("unique_messeger").delete()
-
-    );
+            .doc(element.idMensagem)
+              .delete();
+        });
+         _firestore
+            .collection(Constants.COLLECTION_CONVERSA_BD_NAME)
+            .doc(uuidUser)
+            .collection(Constants.COLLECTION_ULTIMA_CONVERSA_BD_NAME)
+            .doc(idDestinatarioConversa)
+            .delete();
+   });
   }
 
   Future<List<Contato>> recuperarContatos(String emailUserLogged) async{
@@ -105,7 +110,6 @@ class DatabaseService{
          .collection(Constants.COLLECTION_MENSAGEM_BD_NAME)
          .doc(idUserLogado)
          .collection(idDestinatario)
-
          .orderBy("time", descending: false)
          .snapshots().listen((event) {
            final list = event.docs.map((element) =>Mensagem.fromMap(element)).toList();
@@ -120,10 +124,10 @@ class DatabaseService{
          .collection(Constants.COLLECTION_MENSAGEM_BD_NAME)
          .doc(mensagem.idRemetente)
          .collection(mensagem.idDestinatario)
-         .doc("unique_messeger")
-     //.doc(Constants.COLLECTION_MENSAGEM_BD_NAME)
+         .doc(mensagem.idMensagem)
+         // .doc(Constants.COLLECTION_MENSAGEM_BD_NAME)
          .set(mensagem.toMap());
-        // .add(mensagem.toMap());
+         //.add(mensagem.toMap());
    }
 
    Future  salvarDestinatarioMensagem (Mensagem mensagem) async{
@@ -131,10 +135,13 @@ class DatabaseService{
          .collection(Constants.COLLECTION_MENSAGEM_BD_NAME)
          .doc(mensagem.idDestinatario)
          .collection(mensagem.idRemetente)
-        .doc("unique_messeger")
+         .doc(mensagem.idMensagem)
+     // .doc(Constants.COLLECTION_MENSAGEM_BD_NAME)
+         .set(mensagem.toMap());
+
      //.doc(Constants.COLLECTION_MENSAGEM_BD_NAME)
-        .set(mensagem.toMap());
-         //.add(mensagem.toMap());
+         // .set(mensagem.toMap());
+        // .add(mensagem.toMap());
    }
 
    Future salvarUltimaMensagemBd(Conversa conversa) async {

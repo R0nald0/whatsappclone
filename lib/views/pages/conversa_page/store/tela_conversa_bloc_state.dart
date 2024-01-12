@@ -4,6 +4,7 @@ import '../../../../model/Mensagem.dart';
 
 abstract class TelaConversaBlocState{
    final Contato? contato;
+   bool isDownloading =false;
    TelaConversaBlocState({required this.contato});
 }
 

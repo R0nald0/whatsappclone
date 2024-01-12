@@ -1,13 +1,17 @@
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:whatsapp/data/repository/I_message_repository.dart';
 import 'package:whatsapp/data/service/database_service.dart';
+import 'package:whatsapp/helper/dowload_image_state.dart';
 import 'package:whatsapp/model/Mensagem.dart';
 import '../../../model/Contato.dart';
 import '../../../model/Conversa.dart';
 import '../../../model/Usuario.dart';
+import '../../service/storage_service.dart';
 
 class MessengerRepository implements IMessageRepository{
    final DatabaseService _databaseService;
-   MessengerRepository(this._databaseService);
+   final StorageService _storageService;
+   MessengerRepository(this._databaseService,this._storageService);
 
    @override
    Stream<List<Mensagem>> getAllMessagesFromConversation(String idRemetente ,String idDestinatario){
@@ -82,5 +86,47 @@ class MessengerRepository implements IMessageRepository{
          print(exception);
          throw Exception("error ao salvar mensagem para o remetente");
       }
+   }
+
+   Future<UploadTask> salvarImage(String imagePath,String idLoggedUser) async {
+        try{
+        return  await _storageService.salvarImagembd(imagePath, idLoggedUser);
+         // return  await _storageService.dowloadImage(task.snapshot);
+
+        }catch(e){
+           rethrow;
+        }
+   }
+
+   Future<String> createImge(String imagePath,String idLoggedUser) async {
+     try{
+       return await _storageService.saveImage(imagePath, idLoggedUser);
+     }catch(firebaseEx){
+       print(firebaseEx);
+       throw FirebaseException(plugin: "firebase_storage",message: "Nenhuma referencia para esse caminho");
+     }
+     catch(e){
+       print(e);
+       throw Exception("erro ao salvar enviar imagem");
+     }
+   }
+
+
+
+
+   @override
+  Future<String> dowloadImage(TaskSnapshot snapshot) async{
+       try{
+         return await  _storageService.dowloadImage(snapshot);
+       }catch(exeption){
+         rethrow;
+       }
+   }
+
+   void destroyListener(){
+      _databaseService.destroyListenser();
+
+
+
    }
 }

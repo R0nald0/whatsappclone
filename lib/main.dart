@@ -63,9 +63,6 @@ void setupGetIt() {
   ));
 
 
-
-
-
   getIt.registerSingleton<ValidateFieldsBloc>(ValidateFieldsBloc(getIt.get<IReposioryUser>()));
   getIt.registerSingleton<CadastroBloc>(CadastroBloc(getIt.get<IReposioryUser>()));
   getIt.registerSingleton<ConversaBloc>(ConversaBloc(

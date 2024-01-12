@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:uuid/v4.dart';
 import 'package:whatsapp/controller/Banco.dart';
 
 import '../helper/Constants.dart';
 
 class Mensagem {
+   String idMensagem = UuidV4().generate();
   late String _idRemetente;
   late String _msg;
   late String _url;
@@ -29,6 +31,7 @@ class Mensagem {
 
   Map<String, dynamic> toMap() {
     Map<String, dynamic> map = {
+      "idMensagem":this.idMensagem,
       "idRemetente": this._idRemetente,
       "url": this.url,
       "tipo": this.tipo,
@@ -42,6 +45,7 @@ class Mensagem {
   }
 
   Mensagem.fromMap(DocumentSnapshot<Map<String,dynamic>> map){
+     idMensagem =map["idMensagem"];
     _idRemetente= map["idRemetente"];
     url= map["url"];
     tipo= map["tipo"];
@@ -49,8 +53,18 @@ class Mensagem {
     _idDestinatario= map["idDestinatario"];
     data= map["data"];
     _time= map["time"];
-
   }
+
+   Mensagem.fromQuerySnap(QueryDocumentSnapshot<Map<String,dynamic>> map){
+     idMensagem =map["idMensagem"];
+     _idRemetente= map["idRemetente"];
+     url= map["url"];
+     tipo= map["tipo"];
+     _msg= map["mensagem"];
+     _idDestinatario= map["idDestinatario"];
+     data= map["data"];
+     _time= map["time"];
+   }
 
 
   String get idRemetente => _idRemetente;

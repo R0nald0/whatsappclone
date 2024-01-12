@@ -6,7 +6,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:whatsapp/helper/Constants.dart';
 import 'package:whatsapp/main.dart';
-import 'package:whatsapp/model/Conversa.dart';
 import 'package:whatsapp/views/pages/conversa_page/store/tela_conversa_bloc_state.dart';
 import 'package:whatsapp/views/pages/conversa_page/store/tela_conversa_bloc.dart';
 import '../../../GeraRotas.dart';
@@ -27,6 +26,7 @@ class TelaConversaState extends State<TelaConversa> {
   String idUserLogado = "";
   final TextEditingController _controllerTextoMsg = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+
 
 
    getDataContact() async{
@@ -56,7 +56,7 @@ class TelaConversaState extends State<TelaConversa> {
 
   @override
   void dispose() {
-    telaConversaBloc.destroyListener();
+   // telaConversaBloc.destroyListener();
     super.dispose();
   }
 
@@ -112,9 +112,13 @@ class TelaConversaState extends State<TelaConversa> {
                 prefixIcon:
                   IconButton(
                          icon:BlocBuilder<TelaConversaBloc,TelaConversaBlocState>(
+                             buildWhen: (previous, current) {
+                               //TODO Verificar
+                                return previous.isDownloading != current.isDownloading;
+                             },
                            bloc: telaConversaBloc,
                            builder: (context, state) {
-                            return state is TelaConversaLoadingImageState
+                            return state.isDownloading
                               ?const Center(child: CircularProgressIndicator())
                               : const Icon(Icons.camera_alt);
                            }
@@ -234,44 +238,15 @@ class TelaConversaState extends State<TelaConversa> {
     );
   }
 
-/*  _stremListMensagen(Contato contato){
-    return StreamBuilder(
-      stream: telaConversaBloc.listenerMenssagens(widget.dataConversation.idRemetente,widget.dataConversation.idDestinatario),
-      builder: (context, AsyncSnapshot snapshot) {
-        switch (snapshot.connectionState) {
-          case ConnectionState.none:
-          case ConnectionState.waiting:
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-            break;
-          case ConnectionState.active:
-          case ConnectionState.done:
-            if (snapshot.hasData) {
-
-              Timer(const Duration(seconds: 1),(){
-                _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
-              });
-              QuerySnapshot querySnapshot = snapshot.data;
-              return camposListMsg(querySnapshot);
-            } else {
-              print("dados" + snapshot.hasError.toString());
-            }
-        }
-
-        return const Center(
-          child: Text("msg"),
-        );
-      },
-    );
-  }*/
   _blocListMensagen(Contato contato) {
 
     return BlocConsumer(
       bloc: telaConversaBloc,
         listener: (BuildContext context,  state) {
             if(state is TelaConversaErrortState){
-
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(state.errorMessenger))
+                  );
             }
         },
       builder: (context, state) {
@@ -296,4 +271,5 @@ class TelaConversaState extends State<TelaConversa> {
       },
     );
   }
+
 }

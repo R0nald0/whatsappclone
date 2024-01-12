@@ -1,4 +1,5 @@
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:whatsapp/GeraRotas.dart';
@@ -18,6 +19,7 @@ class AbaConversaState extends State<AbaConversa> {
   String userLogado = "";
   late String destinatarioId ;
   final conversaBloc = getIt.get<ConversaBloc>();
+  final FirebaseFirestore _firestore = getIt.get<FirebaseFirestore>();
 
   @override
   void initState() {
@@ -108,7 +110,8 @@ class AbaConversaState extends State<AbaConversa> {
                 key: Key(conversaItem.idRemetente),
                 onDismissed: (direction){
                   if(DismissDirection.endToStart == direction){
-                         conversaBloc.deleteConversation(conversaItem.idDestinatario,conversaItem.idRemetente);
+                      // deleteConversation(conversaItem.idDestinatario,conversaItem.idRemetente);
+                    conversaBloc.deleteConversation(conversaItem.idDestinatario,conversaItem.idRemetente);
                   }
                 },
                 child: Card(
@@ -160,6 +163,27 @@ class AbaConversaState extends State<AbaConversa> {
             }
         ) ,
       );
+
+  }
+
+
+  Future<void> deleteConversation(String idDestinatarioConversa,String uuidUser) async {
+
+    await _firestore.
+         collection(Constants.COLLECTION_MENSAGEM_BD_NAME)
+        .doc(uuidUser)
+        .delete()
+        .onError((error, stackTrace) =>{print("${error}")})
+        .then((value) => {
+           print("thennnn")
+    });/*.whenComplete(() =>
+        _firestore
+            .collection(Constants.COLLECTION_CONVERSA_BD_NAME)
+            .doc(uuidUser)
+            .collection(Constants.COLLECTION_ULTIMA_CONVERSA_BD_NAME)
+            .doc(idDestinatarioConversa)
+            .delete()
+    );*/
 
   }
 
