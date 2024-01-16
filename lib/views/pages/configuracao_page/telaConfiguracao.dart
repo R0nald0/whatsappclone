@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:whatsapp/GeraRotas.dart';
 import 'package:whatsapp/helper/Constants.dart';
+import 'package:whatsapp/main.dart';
 import 'package:whatsapp/model/Usuario.dart';
 import 'package:whatsapp/views/pages/configuracao_page/store/configuracao_bloc.dart';
 import 'package:whatsapp/views/pages/configuracao_page/store/configuracao_state.dart';
@@ -16,10 +17,8 @@ class TelaConfiguracao extends StatefulWidget {
 }
 
 class TelaConfiguracaoState extends State<TelaConfiguracao> {
-  final _telaConfiguracaoBloc= ConfiguracaoBloc();
+  final _telaConfiguracaoBloc= getIt.get<ConfiguracaoBloc>();
   final TextEditingController _controllerNome = TextEditingController();
-
-
 
   @override
   void initState() {
@@ -43,22 +42,20 @@ class TelaConfiguracaoState extends State<TelaConfiguracao> {
                    BlocBuilder<ConfiguracaoBloc,ConfiguracaoState>(
                      bloc: _telaConfiguracaoBloc,
                      builder: (context, state) {
-                       if(state is ConfiguracaoLoadingState){
-                          return const Center(child: CircularProgressIndicator());
-                       }else if (state is ConfiguracaoUpdatedState){
-                         return Padding(
-                           padding: const EdgeInsets.only(top: 10, bottom: 10),
-                           child: CircleAvatar(
+                       return Padding(
+                         padding: const EdgeInsets.only(top: 10, bottom: 10),
+                         child: state is ConfiguracaoUpdatedState
+                          ? CircleAvatar(
                              backgroundColor: Colors.grey,
                              backgroundImage: state.usuario.fotoPerfil.isNotEmpty
-                                 ?NetworkImage(state.usuario.fotoPerfil) as ImageProvider
-                                 :const AssetImage(Constants.IMGAGE_PATH_USARIO_ADD),
-                             radius: 150,
-                           ),
-                         );
-                       }else{
-                         return const Center(child: Text("No Image Profile"),);
-                       }
+                                 ? NetworkImage(
+                                 state.usuario.fotoPerfil) as ImageProvider
+                                 : const AssetImage(Constants
+                                 .IMGAGE_PATH_USARIO_ADD),
+                                radius: 150,
+                             )
+                       : const Center(child: CircularProgressIndicator(),)
+                       );
                      }
                    ),
               Row(
@@ -95,18 +92,18 @@ class TelaConfiguracaoState extends State<TelaConfiguracao> {
                             border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(32)),
                             contentPadding: const EdgeInsets.fromLTRB(32, 16, 32, 16),
-                            labelText: _telaConfiguracaoBloc.nameUser.isNotEmpty
-                                   ?_telaConfiguracaoBloc.nameUser
+                            labelText: _telaConfiguracaoBloc.usuarioState.nome.isNotEmpty
+                                   ?_telaConfiguracaoBloc.usuarioState.nome
                                    :"Digite seu nome"
                         ),
                       );
-
                   }
                 ),
               ),
               BlocConsumer<ConfiguracaoBloc,ConfiguracaoState>(
                 bloc: _telaConfiguracaoBloc,
                   listener: (BuildContext context, ConfiguracaoState state) {
+
                      if(state is ConfiguracaoErrrolState){
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text(state.errorMessenger))
@@ -114,26 +111,24 @@ class TelaConfiguracaoState extends State<TelaConfiguracao> {
                      }
                   },
                 builder: (context, state) {
-                  if(state is ConfiguracaoLoadingState){
-                     return const Center(child: CircularProgressIndicator());
-                  }else{
                     return ElevatedButton(
                         style: ElevatedButton.styleFrom(
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(32),
                             ),
                             padding: const EdgeInsets.fromLTRB(32, 16, 32, 16)),
-                        onPressed: () {
+
+                        onPressed: _telaConfiguracaoBloc.isDisableButton ? null
+                        :() {
                           final usuario = Usuario();
                           usuario.nome = _controllerNome.text;
                           _telaConfiguracaoBloc.validateField(usuario);
-                          Navigator.pushNamedAndRemoveUntil(context, GerarRotas.ROUTE_HOME, (route) => false);
                         },
                         child: const Text(
                           "Atualizar",
                           style: TextStyle(fontSize: 17),
                         ),);
-                     }
+
                   },
               )
             ],

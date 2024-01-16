@@ -1,16 +1,17 @@
 import 'package:firebase_auth/firebase_auth.dart';
-
 import 'package:whatsapp/data/repository/irepository_user.dart';
 import 'package:whatsapp/data/service/authentication_service.dart';
 import 'package:whatsapp/model/Usuario.dart';
-
+import '../../../helper/Constants.dart';
 import '../../service/database_service.dart';
+import '../../service/storage_service.dart';
 
 class UserRepositoryImpl implements IReposioryUser {
-  AuthenticationService _authenticationService;
-  DatabaseService _databaseService;
+  final AuthenticationService _authenticationService;
+  final DatabaseService _databaseService;
+  final StorageService  _storageService;
 
-  UserRepositoryImpl(this._authenticationService, this._databaseService);
+  UserRepositoryImpl(this._authenticationService, this._databaseService, this._storageService);
 
   @override
   Future<String> loginUser(String email, String senha) async {
@@ -24,13 +25,21 @@ class UserRepositoryImpl implements IReposioryUser {
   }
 
   @override
-  void getUserData() {
-    // TODO: implement getUserData
+  Future<Usuario> getUserData() {
+     var user = verificarUsuarioLogado();
+     if(user !=null){
+      final userLogged =_databaseService.recuperarUsuario(user);
+        return userLogged;
+     }
+     else{
+       logoutUser();
+       throw Exception("usuário deslogado");
+     }
   }
 
   @override
   void logoutUser() {
-    // TODO: implement logoutUser
+    _authenticationService.logout();
   }
 
 
@@ -54,8 +63,39 @@ class UserRepositoryImpl implements IReposioryUser {
   }
 
   @override
+  Future<String> createImage(String imagePath,String idLoggedUser) async {
+    try{
+      return  await _storageService.saveAndReturnImage(
+          Constants.COLLECTION_STORAGE_FOTO_PERFIL,
+          imagePath,
+          idLoggedUser
+      );
+    }catch(e){
+      rethrow;
+    }
+  }
+
+  @override
   User? verificarUsuarioLogado() {
     User? user =  _authenticationService.verificarUsuarioLogado();
-    return user;
+    if(user !=null){
+     return user;
+    }
+    return null;
+  }
+
+  @override
+  Future<Usuario?> upadate(Usuario usuario) async {
+     try{
+       final user  = verificarUsuarioLogado();
+        if(user !=null){
+            await _databaseService.updateUser(usuario, user.uid);
+            return await _databaseService.recuperarUsuario(user);
+        }
+        return null;
+     }catch(exception){
+       print(exception);
+       rethrow;
+     }
   }
 }

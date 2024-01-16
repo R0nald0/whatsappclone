@@ -1,7 +1,7 @@
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:whatsapp/data/repository/I_message_repository.dart';
 import 'package:whatsapp/data/service/database_service.dart';
-import 'package:whatsapp/helper/dowload_image_state.dart';
+import 'package:whatsapp/helper/Constants.dart';
 import 'package:whatsapp/model/Mensagem.dart';
 import '../../../model/Contato.dart';
 import '../../../model/Conversa.dart';
@@ -90,7 +90,7 @@ class MessengerRepository implements IMessageRepository{
 
    Future<UploadTask> salvarImage(String imagePath,String idLoggedUser) async {
         try{
-        return  await _storageService.salvarImagembd(imagePath, idLoggedUser);
+        return  await _storageService.salvarImagembd(Constants.COLLECTION_CONVERSA_BD_NAME,imagePath, idLoggedUser);
          // return  await _storageService.dowloadImage(task.snapshot);
 
         }catch(e){
@@ -100,7 +100,7 @@ class MessengerRepository implements IMessageRepository{
 
    Future<String> createImge(String imagePath,String idLoggedUser) async {
      try{
-       return await _storageService.saveImage(imagePath, idLoggedUser);
+       return await _storageService.saveAndReturnImage(Constants.COLLECTION_CONVERSA_BD_NAME,imagePath, idLoggedUser);
      }catch(firebaseEx){
        print(firebaseEx);
        throw FirebaseException(plugin: "firebase_storage",message: "Nenhuma referencia para esse caminho");
@@ -115,7 +115,7 @@ class MessengerRepository implements IMessageRepository{
 
 
    @override
-  Future<String> dowloadImage(TaskSnapshot snapshot) async{
+  Future<String> donwloadImage(TaskSnapshot snapshot) async{
        try{
          return await  _storageService.dowloadImage(snapshot);
        }catch(exeption){
@@ -125,8 +125,5 @@ class MessengerRepository implements IMessageRepository{
 
    void destroyListener(){
       _databaseService.destroyListenser();
-
-
-
    }
 }

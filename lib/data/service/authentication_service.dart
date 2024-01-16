@@ -1,9 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:whatsapp/data/service/storage_service.dart';
+import 'package:whatsapp/helper/Constants.dart';
 
 import '../../model/Usuario.dart';
 
 class AuthenticationService{
   final FirebaseAuth _auth ;
+
   AuthenticationService(this._auth);
 
   Future<String> login(String email, String senha)async{
@@ -35,4 +39,7 @@ class AuthenticationService{
   }
 
 
+  void logout(){
+    _auth.signOut();
+  }
 }

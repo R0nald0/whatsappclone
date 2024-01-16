@@ -1,30 +1,25 @@
-import 'package:firebase_storage/firebase_storage.dart';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:whatsapp/controller/Banco.dart';
+import 'package:whatsapp/data/repository/irepository_user.dart';
 import 'package:whatsapp/model/Usuario.dart';
 import 'package:whatsapp/views/pages/configuracao_page/store/configuracao_state.dart';
 
-import '../../../../main.dart';
-
-
 class ConfiguracaoBloc extends Cubit<ConfiguracaoState>{
-  final  _banco = getIt.get<Banco>();
-  String uriImage = "";
-  String nameUser = "";
+  final IReposioryUser _repositoryUserData ;
+  late Usuario usuarioState = Usuario();
+  var isDisableButton = false;
 
-  ConfiguracaoBloc() : super(ConfiguracaoInitialState());
+  ConfiguracaoBloc(this._repositoryUserData) : super(ConfiguracaoInitialState());
 
   getDataUser() async{
-    final user =  _banco.verificarUsuarioLogado();
-    if(user != null){
+    try{
       emit(ConfiguracaoLoadingState());
-      final usuario  = await Usuario().dadosUser(user.uid);
-       uriImage = usuario.fotoPerfil;
-       nameUser = usuario.nome;
-
-      emit(ConfiguracaoUpdatedState(usuario: usuario));
+      usuarioState= await _repositoryUserData.getUserData();
+      emit(ConfiguracaoUpdatedState(usuario: usuarioState));
+    }catch(exeption){
+      emit(ConfiguracaoErrrolState(errorMessenger: exeption));
     }
   }
 
@@ -37,42 +32,32 @@ class ConfiguracaoBloc extends Cubit<ConfiguracaoState>{
       image = await picker.pickImage(source: ImageSource.gallery);
     }
     if(image != null){
+      isDisableButton = true;
       emit(ConfiguracaoLoadingState());
-      salvarImagemBd(image.path);
+      final userId  = await _repositoryUserData.verificarUsuarioLogado()?.uid;
+      if(userId !=null ){
+        usuarioState.fotoPerfil = await _repositoryUserData.createImage(image.path,userId);
+       }
+      emit(ConfiguracaoUpdatedState(usuario: usuarioState));
+      isDisableButton = false;
     }
-
-  }
-  
-  salvarImagemBd(String arquivoPath) async{
-  final task  =  await _banco.salvarImgPerfil(arquivoPath);
-    task.snapshotEvents.listen((TaskSnapshot snapshot) {
-      if (snapshot.state == TaskState.running) {
-         emit(ConfiguracaoLoadingState());
-      } else if (snapshot.state == TaskState.success) {
-          _dowloadImagem(snapshot);
-      }
-    });
-  }
-  Future _dowloadImagem(TaskSnapshot snapshot) async {
-      uriImage = await snapshot.ref.getDownloadURL();
-     final user =  _banco.verificarUsuarioLogado();
-     final usuario  = await Usuario().dadosUser(user!.uid);
-     usuario.fotoPerfil = uriImage;
-     emit(ConfiguracaoUpdatedState(usuario: usuario));
   }
 
   Future updateUser(Usuario usuarioUpdate) async {
     try {
       if(usuarioUpdate.nome.isNotEmpty) {
-        usuarioUpdate.fotoPerfil = uriImage;
+        usuarioUpdate.fotoPerfil =  usuarioState.fotoPerfil;
         emit(ConfiguracaoLoadingState());
-        await _banco.updateUser(usuarioUpdate);
-        emit(ConfiguracaoUpdatedState(usuario: usuarioUpdate));
+        var result = await _repositoryUserData.upadate(usuarioUpdate);
+        if(result !=null){
+          emit(ConfiguracaoUpdatedState(usuario: result));
+        }else{
+          emit(ConfiguracaoErrrolState(errorMessenger: "Algo de errado aconteceu,usuário  não atualizdo"));
+        }
       }else{
-        usuarioUpdate.nome = nameUser;
-        usuarioUpdate.fotoPerfil = uriImage;
+        usuarioUpdate.nome = usuarioState.nome;
+        usuarioUpdate.fotoPerfil =  usuarioState.fotoPerfil;
         emit(ConfiguracaoLoadingState());
-        await _banco.updateUser(usuarioUpdate);
         emit(ConfiguracaoUpdatedState(usuario: usuarioUpdate));
       }
     } on Exception catch (e) {
@@ -84,9 +69,9 @@ class ConfiguracaoBloc extends Cubit<ConfiguracaoState>{
   }
 
   void validateField(Usuario usuarioUpdate){
-    if(usuarioUpdate.nome != nameUser || usuarioUpdate.fotoPerfil != uriImage){
+    if(usuarioUpdate.nome != usuarioState.nome || usuarioUpdate.fotoPerfil !=  usuarioState.fotoPerfil){
          updateUser(usuarioUpdate);
-        return;
+         return;
     }
   }
 

@@ -10,17 +10,26 @@ class StorageService{
     StorageService(this._storageFirebase);
 
 
-   Future<UploadTask> salvarImagembd(String imagePath,String idLoggedUser) async {
+   Future<UploadTask> salvarImagembd(String collectioPath,String imagePath,String idLoggedUser) async {
+     if( collectioPath == Constants.COLLECTION_STORAGE_FOTO_PERFIL){
+       Reference reference = _storageFirebase.ref();
+       Reference caminho = reference
+           .child(Constants.COLLECTION_STORAGE_FOTO_PERFIL)
+           .child(" $idLoggedUser.jpg");
+       UploadTask task = caminho.putFile(File(imagePath));
 
-    Reference reference = _storageFirebase.ref();
-    Reference caminho = reference
-        .child(Constants.COLLECTION_CONVERSA_BD_NAME)
-        .child(idLoggedUser)
-        .child(DateTime.now().toString() + ".jpg");
+       return task;
+     }else{
+       Reference reference = _storageFirebase.ref();
+       Reference caminho = reference
+           .child(Constants.COLLECTION_CONVERSA_BD_NAME)
+           .child(idLoggedUser)
+           .child(DateTime.now().toString() + ".jpg");
 
-    UploadTask task = caminho.putFile(File(imagePath));
+       UploadTask task = caminho.putFile(File(imagePath));
 
-    return task;
+       return task;
+     }
   }
 
    Future<String> dowloadImage(TaskSnapshot snapshot) async {
@@ -31,9 +40,9 @@ class StorageService{
       }
    }
 
-   Future<String> saveImage(String pathImage,String idUser) async{
+   Future<String> saveAndReturnImage( String collectioPath,String pathImage,String idUser) async{
     try{
-      final uploadTask  =  await salvarImagembd(pathImage, idUser);
+      final uploadTask  =  await salvarImagembd(collectioPath ,pathImage, idUser);
       return  await dowloadImage(uploadTask.snapshot);
     }catch(ex){
       rethrow;

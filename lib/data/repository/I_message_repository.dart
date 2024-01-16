@@ -9,7 +9,7 @@ abstract class IMessageRepository {
   Future<void> saveMessager(Mensagem mensagem);
   Future<void> salvarUltimaMensagemConversa(Mensagem mensagem,Contato contato);
   Future<UploadTask> salvarImage(String imagePath,String idLoggedUser);
-  Future<String> dowloadImage(TaskSnapshot snapshot);
+  Future<String> donwloadImage(TaskSnapshot snapshot);
   Future<String> createImge(String imagePath,String idLoggedUser);
   Future<void> _saveLastMessageToSender(Mensagem mensagem,Contato contato);
   Future<void> _saveLastMessageToRecipient(Mensagem mensagem);

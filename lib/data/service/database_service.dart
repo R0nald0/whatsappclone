@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
-import 'package:uuid/v4.dart';
+
 import '../../helper/Constants.dart';
 import '../../model/Contato.dart';
 import '../../model/Conversa.dart';
@@ -16,7 +16,7 @@ class DatabaseService{
    final _controller =StreamController<List<Conversa>>.broadcast();
    final _controllerConversa =StreamController<List<Mensagem>>.broadcast();
 
-  Future<String> salvarUsuario(Usuario usuario,String uudiUser) async {
+   Future<String> salvarUsuario(Usuario usuario,String uudiUser) async {
     try{
         await _firestore.collection(Constants.COLLECTION_USUARIO_BD_NAME)
             .doc(uudiUser)
@@ -156,6 +156,17 @@ class DatabaseService{
    destroyListenser(){
       _controllerConversa.close();
       _controller.close();
+   }
+
+   Future<void> updateUser(Usuario usuario,String id) async{
+     try{
+       await _firestore
+           .collection(Constants.COLLECTION_USUARIO_BD_NAME)
+           .doc(id).update(usuario.toMap());
+     }catch(exception){
+       print(exception);
+       rethrow;
+     }
    }
 
 }
