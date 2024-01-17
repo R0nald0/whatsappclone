@@ -79,7 +79,7 @@ class UserRepositoryImpl implements IReposioryUser {
   User? verificarUsuarioLogado() {
     User? user =  _authenticationService.verificarUsuarioLogado();
     if(user !=null){
-     return user;
+       return user;
     }
     return null;
   }

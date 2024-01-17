@@ -56,10 +56,17 @@ class ConfiguracaoBloc extends Cubit<ConfiguracaoState>{
         }
       }else{
         usuarioUpdate.nome = usuarioState.nome;
-        usuarioUpdate.fotoPerfil =  usuarioState.fotoPerfil;
+        usuarioUpdate.fotoPerfil = usuarioState.fotoPerfil;
         emit(ConfiguracaoLoadingState());
+        var result = await _repositoryUserData.upadate(usuarioUpdate);
+        if(result !=null){
+          emit(ConfiguracaoUpdatedState(usuario: result));
+        }else{
+          emit(ConfiguracaoErrrolState(errorMessenger: "Algo de errado aconteceu,usuário  não atualizdo"));
+        }
         emit(ConfiguracaoUpdatedState(usuario: usuarioUpdate));
       }
+
     } on Exception catch (e) {
       if (kDebugMode) {
         print(e);
